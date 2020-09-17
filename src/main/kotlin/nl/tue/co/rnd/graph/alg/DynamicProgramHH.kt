@@ -37,11 +37,14 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
 
         while (currentTrees.size > 1) {
             currentTrees.groupBy { it.parent }.forEach { (newRoot, trees) ->
+                if (trees.size <= 1) return@forEach
+
                 val newChildren = trees.map { it.root }.toSet()
                 val newParent = (demandTree.neighbors(newRoot!!) - newChildren).firstOrNull()
                 val newSubtree = Subtree(newRoot, newChildren, newParent)
 
                 subtrees.add(newSubtree)
+                currentTrees.add(newSubtree)
                 currentTrees.removeAll(trees)
             }
         }
