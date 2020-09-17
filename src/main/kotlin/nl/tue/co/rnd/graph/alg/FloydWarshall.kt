@@ -3,7 +3,7 @@ package nl.tue.co.rnd.graph.alg
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 
-class FloydWarshall<V, E : WeightedEdge<V>>(val graph: WeightedGraph<V, E>) {
+class FloydWarshall<V>(val graph: WeightedGraph<V>) {
 
     fun computeShortestPaths(): Map<Pair<V, V>, Double> {
         val distance: MutableMap<Pair<V, V>, Double> = graph.vertices.product(graph.vertices)
