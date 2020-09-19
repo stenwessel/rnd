@@ -2,13 +2,13 @@ package nl.tue.co.rnd.graph.alg
 
 import nl.tue.co.rnd.graph.WeightedGraph
 
-interface HierarchicalHubbing<V> {
+interface GeneralizedVpnSolver<V> {
 
     val graph: WeightedGraph<V>
     val demandTree: WeightedGraph<V>
     val terminals: Set<V>
 
-    fun computeSolution(): HubbingResult<V>
+    fun computeSolution(): VpnResult<V>
 
-    data class HubbingResult<V>(val cost: Double, val mappings: Set<Map<V, V>>)
+    data class VpnResult<V>(val cost: Double)
 }

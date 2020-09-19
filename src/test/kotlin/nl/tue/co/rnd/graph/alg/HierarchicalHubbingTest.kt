@@ -30,7 +30,10 @@ internal class HierarchicalHubbingTest {
         val (costEnum, _) = EnumerateHH(graph, demandTree, terminals).computeSolution()
         val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
 
+        val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
+
         assertEquals(costEnum, costDp)
+        assertEquals(costEnum, costMip)
     }
 
     @Test
