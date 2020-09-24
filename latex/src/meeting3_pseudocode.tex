@@ -26,7 +26,7 @@
             \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T$ and $h$ is an empty mapping from $V_T$ to $V_G$.
             \Procedure{Assign}{verticesToAssign, $h$}
                 \If {verticesToAssign is empty}
-                    \State \Return $\left(\sum_{\set{u, v} \in E_T} d(h(u), h(v)), h \right)$ \Comment{The summation is the cost of a mapping $h$}
+                    \State \Return $\left(\sum_{\set{u, v} \in E_T} d(h(u), h(v)), h \right)$ \Comment{The summation is the cost of mapping $h$}
                 \EndIf
 
                 \State $u$ = verticesToAssign.first()
@@ -53,35 +53,38 @@
         \end{algorithmic}
     \end{algorithm}
 
-    \begin{algorithmic}[1]
-        \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T$ and $h$ is an empty mapping from $V_T$ to $V_G$.
-        \Procedure{Assign}{verticesToAssign, $h$}
-            \If {verticesToAssign is empty}
-                \State \Return $\left(\sum_{\set{u, v} \in E_T} d(h(u), h(v)), h \right)$ \Comment{The summation is the cost of a mapping $h$}
-            \EndIf
+    \begin{algorithm}
+        \label{alg:idk}
+        \begin{algorithmic}[1]
+            \Statex Dynamic programming algorithm to find all optimal mappings.
+            \Procedure{GetSubtrees}{$V_T, E_T, W$}
+                \State root = arbitrary node in $V_T - W$
 
-            \State $u$ = verticesToAssign.first()
-            \State bestCost = $\infty$
-            \State bestMappings = $\emptyset$
+                \State $\mathcal S$ = empty list
+                \State $\mathcal S$.add(Subtree(root, root.neighbors, null)) \Comment{A subtree has a root, children and parent}
+                \State $\mathcal Q$ = $\mathcal S$
 
-            \ForAll {vertices $v$ in graph}
-                \State $h(u)$ = $v$
-                \State (currentCost, currentMapping) = \textsc{Assign}(verticesToAssign $-$ $u$, $h$)
+                \While {$\mathcal Q$ is not empty}
+                    \State tree = $\mathcal Q$.removeFirst
+                    \State currentRoot = tree.root
+                    \ForAll{vertices $r$ in tree.children}
+                        \State $S$ = Subtree($r$, $r$.neighbors $-$ currentRoot, currentRoot)
+                        \State $\mathcal S$.add($S$)
+                        \State $\mathcal Q$.add($S$)
+                    \EndFor
+                \EndWhile
+                \Return subtrees.reversed()
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
 
-                \If {currentCost $\leq$ bestCost}
-                    \If {currentCost $<$ bestCost}
-                        \State bestMappings = $\emptyset$
-                        \State bestCost = currentCost
-                    \EndIf
-
-                    \State bestMappings.add($h$)
-                \EndIf
-
-            \EndFor
-
-            \State \Return (bestCost, bestMappings)
-        \EndProcedure
-    \end{algorithmic}
-\end{algorithm}
+    Recurrence:
+    \[
+        T[S, v] = \begin{cases}
+                      0 &\text{if $S$.root $\in W$ and $S$.root = $v$} \\
+                      \infty &\text{if $S$.root $\in W$ and $S$.root $\neq$ $v$} \\
+                      \sum_{r \in S.\text{children}} \min_{w \in V_G} \left( T[S_r, w] + b(\set{r, S.\text{root}}) \cdot d(v, w) \right) &\text{otherwise} \\
+        \end{cases}
+    \]
 
 \end{document}
