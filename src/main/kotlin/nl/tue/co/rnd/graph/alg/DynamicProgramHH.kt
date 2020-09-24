@@ -31,21 +31,23 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
     }
 
     private fun buildSubtrees(): List<Subtree<V>> {
-        // Start with the terminals (leaves)
-        val subtrees = terminals.map { Subtree(it, emptySet(), demandTree.neighbors(it).first()) }.toMutableList()
-        val currentTrees = subtrees.toMutableSet()
+        // Choose an arbitrary root (that is not a leaf)
+        val root = demandTree.vertices.find { it !in terminals } ?: error("Demand tree is not rootable from a non-leaf vertex.")
 
-        while (currentTrees.size > 1) {
-            currentTrees.groupBy { it.parent }.forEach { (newRoot, trees) ->
-                if (trees.size <= 1) return@forEach
+        // The discovered subtrees must be stored bottom-up, hence they must be stored from the start of the collection.
+        // We use an ArrayDeque to do this efficiently
+        val subtrees = ArrayDeque<Subtree<V>>()
+        subtrees.addFirst(Subtree(root, demandTree.neighbors(root), parent = null))
 
-                val newChildren = trees.map { it.root }.toSet()
-                val newParent = (demandTree.neighbors(newRoot!!) - newChildren).firstOrNull()
-                val newSubtree = Subtree(newRoot, newChildren, newParent)
+        // Current trees that we are considering
+        val currentTrees = ArrayDeque(subtrees)
 
-                subtrees.add(newSubtree)
-                currentTrees.add(newSubtree)
-                currentTrees.removeAll(trees)
+        while (currentTrees.isNotEmpty()) {
+            val currentTree = currentTrees.removeFirst()
+            for (newRoot in currentTree.children) {
+                val newSubtree = Subtree(newRoot, (demandTree.neighbors(newRoot) - currentTree.root), currentTree.root)
+                subtrees.addFirst(newSubtree)
+                currentTrees.addLast(newSubtree)
             }
         }
 
