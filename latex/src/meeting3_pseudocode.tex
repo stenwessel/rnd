@@ -1,0 +1,87 @@
+%! suppress = Makeatletter
+\documentclass[language=english, number=1]{../lib/homework}
+
+\coursename{Cryptology}
+\pagestyle{headandfoot}
+\makeatletter
+\title{\textbf{\hw@coursename}\\Homework~\hw@number}%
+\runningheadrule
+\runningheader{\today}{2MMC10 Homework~\hw@number}{}
+\footer{}{\thepage}{}
+\makeatother
+\authors{David Dekker\\ Thomas Schouten\\ Sten Wessel}
+
+\newtheorem{claim}{Claim}
+
+\DeclareMathOperator{\Enc}{Enc}
+
+\begin{document}
+    \maketitle
+    \hrule
+
+    \begin{algorithm}
+        \caption{RecursiveHubbing}
+        \label{alg:TriangulateStar}
+        \begin{algorithmic}[1]
+            \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T$ and $h$ is an empty mapping from $V_T$ to $V_G$.
+            \Procedure{Assign}{verticesToAssign, $h$}
+                \If {verticesToAssign is empty}
+                    \State \Return $\left(\sum_{\set{u, v} \in E_T} d(h(u), h(v)), h \right)$ \Comment{The summation is the cost of a mapping $h$}
+                \EndIf
+
+                \State $u$ = verticesToAssign.first()
+                \State bestCost = $\infty$
+                \State bestMappings = $\emptyset$
+
+                \ForAll {vertices $v$ in graph}
+                    \State $h(u)$ = $v$
+                    \State (currentCost, currentMapping) = \textsc{Assign}(verticesToAssign $-$ $u$, $h$)
+
+                    \If {currentCost $\leq$ bestCost}
+                        \If {currentCost $<$ bestCost}
+                            \State bestMappings = $\emptyset$
+                            \State bestCost = currentCost
+                        \EndIf
+
+                        \State bestMappings.add($h$)
+                    \EndIf
+
+                \EndFor
+
+                \State \Return (bestCost, bestMappings)
+            \EndProcedure
+        \end{algorithmic}
+    \end{algorithm}
+
+    \begin{algorithmic}[1]
+        \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T$ and $h$ is an empty mapping from $V_T$ to $V_G$.
+        \Procedure{Assign}{verticesToAssign, $h$}
+            \If {verticesToAssign is empty}
+                \State \Return $\left(\sum_{\set{u, v} \in E_T} d(h(u), h(v)), h \right)$ \Comment{The summation is the cost of a mapping $h$}
+            \EndIf
+
+            \State $u$ = verticesToAssign.first()
+            \State bestCost = $\infty$
+            \State bestMappings = $\emptyset$
+
+            \ForAll {vertices $v$ in graph}
+                \State $h(u)$ = $v$
+                \State (currentCost, currentMapping) = \textsc{Assign}(verticesToAssign $-$ $u$, $h$)
+
+                \If {currentCost $\leq$ bestCost}
+                    \If {currentCost $<$ bestCost}
+                        \State bestMappings = $\emptyset$
+                        \State bestCost = currentCost
+                    \EndIf
+
+                    \State bestMappings.add($h$)
+                \EndIf
+
+            \EndFor
+
+            \State \Return (bestCost, bestMappings)
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+\end{document}
