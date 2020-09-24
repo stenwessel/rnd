@@ -24,8 +24,6 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
         val (masterProblem, u, fMin, fPlus) = buildMasterProblem(env, terminalSequence)
         val (subProblem, demand) = buildSubProblem(env, terminalSequence)
 
-        var matricesAdded = 0
-
         solving@ while (true) {
             masterProblem.optimize()
 
@@ -43,8 +41,6 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
 
                 // Add lazy constr if constraint is violated
                 if (subProblem.get(GRB.DoubleAttr.ObjVal) > u[e]!!.get(GRB.DoubleAttr.X)) {
-                    matricesAdded++
-
                     for (f in graph.edges) {
                         val rhs = GRBLinExpr()
                         for ((ij, d) in demand) {
@@ -140,11 +136,34 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
     }
 
     private fun findPathsInDemandTree(terminalSequence: Sequence<Pair<V, V>>): Map<Pair<V, V>, Set<WeightedEdge<V>>> {
-        // TODO: now assumes a star
+        // Do this the lazy way
         return terminalSequence.map {
             val (i, j) = it
 
-            it to (demandTree.incidentEdges(i) + demandTree.incidentEdges(j)).toSet()
+            val visited = mutableMapOf<V, Set<WeightedEdge<V>>>(i to emptySet())
+            val boundary = ArrayDeque<WeightedEdge<V>>()
+            boundary.addAll(demandTree.incidentEdges(i))
+
+            while (boundary.isNotEmpty()) {
+                val currentEdge = boundary.removeFirst()
+
+                val discovered = if (currentEdge.first !in visited) currentEdge.first else currentEdge.second
+                val from = if (currentEdge.first !in visited) currentEdge.second else currentEdge.first
+
+                visited[discovered] = visited[from]!! + currentEdge
+
+                if (discovered == j) {
+                    return@map it to visited[discovered]!!
+                }
+
+                for (newEdge in demandTree.incidentEdges(discovered)) {
+                    if (newEdge == currentEdge) continue
+
+                    boundary.addLast(newEdge)
+                }
+            }
+
+            it to emptySet()
         }.toMap()
     }
 
