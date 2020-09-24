@@ -31,9 +31,11 @@ internal class HierarchicalHubbingTest {
         val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
 
         val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
+        val (costCompactMip) = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
 
         assertEquals(costEnum, costDp)
         assertEquals(costEnum, costMip)
+        assertEquals(costEnum, costCompactMip)
     }
 
     @Test
@@ -70,9 +72,11 @@ internal class HierarchicalHubbingTest {
         val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
 
         val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
+        val (costCompactMip) = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
 
         assertEquals(costEnum, costDp)
         assertEquals(costEnum, costMip)
+        assertEquals(costEnum, costCompactMip)
     }
 
     @Test
@@ -102,8 +106,10 @@ internal class HierarchicalHubbingTest {
         val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
 
         val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
+        val (costCompactMip) = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
 
         assertEquals(costEnum, costDp)
         assertEquals(costEnum, costMip)
+        assertEquals(costEnum, costCompactMip)
     }
 }
