@@ -21,7 +21,7 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
         val env = GRBEnv(true)
         env.start()
 
-        val (masterProblem, u, p, fMin, fPlus) = buildMasterProblem(env, terminalSequence)
+        val (masterProblem, u, fMin, fPlus) = buildMasterProblem(env, terminalSequence)
         val (subProblem, demand) = buildSubProblem(env, terminalSequence)
 
         var matricesAdded = 0
@@ -29,35 +29,14 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
         solving@ while (true) {
             masterProblem.optimize()
 
-            for ((_, v) in p) {
-                if (v.get(GRB.DoubleAttr.X) == 1.0) {
-                    println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-                }
-            }
-
-            for ((_, v) in fMin) {
-                if (v.get(GRB.DoubleAttr.X) == 1.0) {
-                    println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-                }
-            }
-
-            for ((_, v) in fPlus) {
-                if (v.get(GRB.DoubleAttr.X) == 1.0) {
-                    println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-                }
-            }
-
-            for ((_, v) in u) {
-                println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-            }
-
             // Solve the subproblems, adding constr it a constraint is violated
             for (e in graph.edges) {
                 demand.forEach { (ij, d) ->
                     val (i, j) = ij
-                    val peij = p[Triple(e, i, j)]!!.get(GRB.DoubleAttr.X)
+                    val fMineij = fMin[Triple(e, i, j)]!!.get(GRB.DoubleAttr.X)
+                    val fPluseij = fPlus[Triple(e, i, j)]!!.get(GRB.DoubleAttr.X)
 
-                    d.set(GRB.DoubleAttr.Obj, peij)
+                    d.set(GRB.DoubleAttr.Obj, fMineij + fPluseij)
                 }
 
                 subProblem.optimize()
@@ -66,24 +45,17 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
                 if (subProblem.get(GRB.DoubleAttr.ObjVal) > u[e]!!.get(GRB.DoubleAttr.X)) {
                     matricesAdded++
 
-                    println("Kameel:")
-                    for ((_, v) in demand) {
-                        println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-                    }
-
                     for (f in graph.edges) {
                         val rhs = GRBLinExpr()
                         for ((ij, d) in demand) {
                             val (i, j) = ij
 
-                            rhs.addTerm(d.get(GRB.DoubleAttr.X), p[Triple(f, i, j)])
+                            rhs.addTerm(d.get(GRB.DoubleAttr.X), fMin[Triple(f, i, j)])
+                            rhs.addTerm(d.get(GRB.DoubleAttr.X), fPlus[Triple(f, i, j)])
                         }
 
                         masterProblem.addConstr(u[f], GRB.GREATER_EQUAL, rhs, null)
                     }
-
-                    masterProblem.write("second.lp")
-                    masterProblem.write("second.mps")
 
                     continue@solving
                 }
@@ -92,21 +64,6 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
 
             break
         }
-
-        println("Banaan: $matricesAdded")
-
-        for ((_, v) in p) {
-            if (v.get(GRB.DoubleAttr.X) == 1.0) {
-                println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-            }
-        }
-
-        for ((_, v) in u) {
-            println("${v.get(GRB.StringAttr.VarName)} = ${v.get(GRB.DoubleAttr.X)}")
-        }
-
-        masterProblem.write("model.lp")
-
 
         return VpnResult(masterProblem.get(GRB.DoubleAttr.ObjVal))
     }
@@ -133,17 +90,6 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
                     model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "f-[e={${e.first},${e.second}},i=$i,j=$j]")
                 }
 
-        val p = graph.edges.product(terminalSequence.asIterable())
-                .map { Triple(it.first, it.second.first, it.second.second) }
-                .associateWith {
-                    val (e, i, j) = it
-                    val v = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "p[e={${e.first},${e.second}},i=$i,j=$j]")
-
-                    model.addConstr(GRBLinExpr().apply { addTerm(1.0, flowMin[it]); addTerm(1.0, flowPlus[it]) }, GRB.EQUAL, v, "pathDefinition[e={${e.first},${e.second}},i=$i,j=$j]")
-
-                    v
-                }
-
         // Flow constraints
         terminalSequence.forEach { (i, j) ->
             for (v in graph.vertices) {
@@ -165,7 +111,7 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
             }
         }
 
-        return MasterProblem(model, u, p, flowMin, flowPlus)
+        return MasterProblem(model, u, flowMin, flowPlus)
     }
 
     private fun buildSubProblem(env: GRBEnv, terminalSequence: Sequence<Pair<V, V>>): SubProblem<V> {
@@ -204,7 +150,6 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
 
     private data class MasterProblem<V>(val model: GRBModel,
                                         val u: Map<WeightedEdge<V>, GRBVar>,
-                                        val p:  Map<Triple<WeightedEdge<V>, V, V>, GRBVar>,
                                         val fMin:  Map<Triple<WeightedEdge<V>, V, V>, GRBVar>,
                                         val fPlus:  Map<Triple<WeightedEdge<V>, V, V>, GRBVar>)
 
