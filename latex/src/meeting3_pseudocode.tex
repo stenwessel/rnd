@@ -6,7 +6,7 @@
 \makeatletter
 \title{\textbf{\hw@coursename}\\Homework~\hw@number}%
 \runningheadrule
-\runningheader{\today}{2MMC10 Homework~\hw@number}{}
+%\runningheader{\today}{2MMC10 Homework~\hw@number}{}
 \footer{}{\thepage}{}
 \makeatother
 \authors{David Dekker\\ Thomas Schouten\\ Sten Wessel}
@@ -16,8 +16,8 @@
 \DeclareMathOperator{\Enc}{Enc}
 
 \begin{document}
-    \maketitle
-    \hrule
+%    \maketitle
+%    \hrule
 
     \begin{algorithm}
         \caption{RecursiveHubbing}
@@ -54,6 +54,7 @@
     \end{algorithm}
 
     \begin{algorithm}
+        \caption{Finding all subtrees for the dynamic programming algorithm}
         \label{alg:idk}
         \begin{algorithmic}[1]
             \Statex Dynamic programming algorithm to find all optimal mappings.
@@ -73,7 +74,7 @@
                         \State $\mathcal Q$.add($S$)
                     \EndFor
                 \EndWhile
-                \Return subtrees.reversed()
+                \State \Return subtrees.reversed()
             \EndProcedure
         \end{algorithmic}
     \end{algorithm}
