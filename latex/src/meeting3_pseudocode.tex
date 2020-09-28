@@ -83,5 +83,6 @@
                       \displaystyle \sum_{r \in S.\text{children}} \min_{w \in V_G} \Big( T[S_r, w] + b(\set{r, S.\text{root}}) \cdot d(v, w) \Big) &\text{otherwise} \\
         \end{cases}
     \]
+    When the table is completely filled, the returned result is obtained by computing $\min_{v \in V_G} T[S_T, v]$, where $S_T$ denotes the (unique) subtree containing all vertices of $T$.
 
 \end{document}

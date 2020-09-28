@@ -20,6 +20,7 @@
             \item Demand tree $T = (V_T, E_T)$ with edge capacity $b_e$
             \item Terminals $W \subseteq V_G$, equal to leaf set of $T$
             \item Universe $\mathcal U_T \subseteq \mathcal S^W$ of demand matrices
+            \item $\binom{W}{2}$ denotes all unordered pairs of terminals
         \end{itemize}
     \end{frame}
 
@@ -29,23 +30,23 @@
         \vspace*{-3em}
         \begin{alignat*}{5}
             \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
-            \text{subject to}\ && x_{uv} &\ge \onslide<1>{\max_{D \in \mathcal U_T}} \sum_{i,j \in W} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G\only<2>{,\ D \in \mathcal U_T}\only<3->{,\ D \in \alert{\mathcal U^*_T}}} \\
+            \text{subject to}\ && x_{uv} &\ge \onslide<1>{\max_{D \in \mathcal U_T}} \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G\only<2>{,\ D \in \mathcal U_T}\only<3->{,\ D \in \alert{\mathcal U^*_T}}} \\
             && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
                                          1 & \text{if $u = i$} \\
                                          -1 & \text{if $u = j$} \\
                                          0 & \text{otherwise}
-            \end{cases} &&\qquad \forall_{u \in V_G,\ i,j \in W} \\
+            \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \\
             && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
-            && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ i,j \in W}
+            && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
         \end{alignat*}%
         \only<3->{%
-            \begin{textblock}{1}(0.13,0.30)
+            \begin{textblock}{1}(0.15,0.30)
                 \begin{alertblock}{Row generation subproblems (for all $uv \in E_G$)}
                     \vspace*{-1em}
                     \begin{alignat*}{5}
-                        \text{maximize}\quad && \sum_{i,j \in W} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
-                        \text{subject to}\quad && \sum_{\substack{i,j \in W\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \\
-                        && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{i,j \in W}
+                        \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
+                        \text{subject to}\quad && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \\
+                        && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
                     \end{alignat*}
                     If $D^*$ has objective $> \tilde x_{uv}$, add $D^*$ to $\mathcal U_T^*$.
                 \end{alertblock}
@@ -56,32 +57,32 @@
     \begin{frame}{Dualize subproblems for each $uv \in E_G$}
         \vspace*{-1em}
         \begin{alignat*}{5}
-            \text{maximize}\ && \sum_{i,j \in W} (f_{uv}^{ij} + f_{vu}^{ij}) \cdot D_{ij} &&& \\
-            \text{subject to}\ && \sum_{\substack{i,j \in W\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \qquad \alert{(\omega_e^{uv})} \\
-            && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{i,j \in W}
+            \text{maximize}\ && \sum_{ij \in \binom{W}{2}} (f_{uv}^{ij} + f_{vu}^{ij}) \cdot D_{ij} &&& \\
+            \text{subject to}\ && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \qquad \alert{(\omega_e^{uv})} \\
+            && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
         \end{alignat*}
         \hrulefill
         \begin{alignat*}{5}
             \text{minimize}\ && \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&& \\
-            \text{subject to}\ && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{i,j \in W} \\
+            \text{subject to}\ && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{ij \in \binom{W}{2}} \\
             && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{e \in E_T}
         \end{alignat*}
     \end{frame}
 
     \begin{frame}{Compact MIP formulation}
-        \vspace*{-1em}
+        \vspace*{-2em}
         \begin{alignat*}{5}
             \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
             \text{subject to}\ && \alert{x_{uv}} &\alert{\ge \sum_{e \in E_T} b_e \cdot \omega_e^{uv}} &&\qquad \alert{\forall_{uv \in E_G}} \\
-            && \alert{\sum_{e \in \pi_T(i,j)} \omega_e^{uv}} &\alert{\ge f_{uv}^{ij} + f_{vu}^{ij}} &&\qquad \alert{\forall_{uv \in E_G,\ i,j \in W}} \\
+            && \alert{\sum_{e \in \pi_T(i,j)} \omega_e^{uv}} &\alert{\ge f_{uv}^{ij} + f_{vu}^{ij}} &&\qquad \alert{\forall_{uv \in E_G,\ ij \in \binom{W}{2}}} \\
             && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
                                          1 & \text{if $u = i$} \\
                                          -1 & \text{if $u = j$} \\
                                          0 & \text{otherwise}
-            \end{cases} &&\qquad \forall_{u \in V_G,\ i,j \in W} \\
+            \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \\
             && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
             && \alert{\omega_e^{uv}} &\alert{\in \mathbb{R}_+} &&\qquad \alert{\forall_{uv \in E_G,\ e \in E_T}} \\
-            && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ i,j \in W}
+            && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
         \end{alignat*}%
     \end{frame}
 \end{document}
