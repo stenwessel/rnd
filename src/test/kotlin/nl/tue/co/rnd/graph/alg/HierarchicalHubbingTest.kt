@@ -5,6 +5,10 @@ import nl.tue.co.rnd.graph.WeightedGraph
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
+import kotlin.math.round
+import kotlin.random.Random
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 internal class HierarchicalHubbingTest {
 
@@ -111,5 +115,74 @@ internal class HierarchicalHubbingTest {
         assertEquals(costEnum, costDp)
         assertEquals(costEnum, costMip)
         assertEquals(costEnum, costCompactMip)
+    }
+
+    @Test
+    @ExperimentalTime
+    fun largeLodiRing() {
+        val type1Terminals = setOf(1, 2, 3, 15, 20, 30, 31, 32, 33, 42, 45, 55, 56, 65, 75, 80, 90)
+        val type2Terminals = setOf(4, 5, 10, 25, 34, 35, 40, 41, 50, 60, 70, 85, 95)
+
+        val random = Random(1985)
+
+        while (true) {
+            val (graph, demandTree, terminals) = createLodiRingInstance(100, type1Terminals, type2Terminals, random)
+
+            val costDp: Double
+            val costEnum: Double
+            val costCompactMip: Double
+
+            val dpTime = measureTime {
+                val result = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
+                costDp = result.cost
+            }
+
+            println("DP: ${dpTime.inSeconds} s with solution $costDp")
+
+            val enumTime = measureTime {
+                val result = EnumerateHH(graph, demandTree, terminals).computeSolution()
+                costEnum = result.cost
+            }
+
+            println("Enum: ${enumTime.inSeconds} s with solution $costEnum")
+
+            val compactMipTime = measureTime {
+                val result = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
+                costCompactMip = result.cost
+            }
+
+            println("MIP: ${compactMipTime.inSeconds} s with solution $costCompactMip")
+
+            if (costDp != costEnum || costDp != round(costCompactMip)) {
+                println("Hahaha!!")
+                println("Bridge capacity: ${demandTree.edges.find { it.first < 0 && it.second < 0 }!!.weight}")
+                println("Sides of the tree:")
+                for (terminal in terminals) {
+                    println("$terminal: ${demandTree.incidentEdges(terminal)[0].second}")
+                }
+                assert(false)
+                return
+            }
+        }
+
+    }
+
+    private fun createLodiRingInstance(nodes: Int, type1Terminals: Set<Int>, type2Terminals: Set<Int>, random: Random): Triple<WeightedGraph<Int>, WeightedGraph<Int>, Set<Int>> {
+        val ring = WeightedGraph(
+                (1..nodes).toSet(),
+                (1..nodes).asSequence()
+                        .windowed(2, partialWindows = true)
+                        .map { WeightedEdge(it[0], it.getOrElse(1) { 1 }, 1.0) }
+                        .toSet()
+        )
+
+        val terminals = type1Terminals + type2Terminals
+
+        val tree = WeightedGraph(
+                terminals + setOf(-1, -2),
+                (type1Terminals.map { WeightedEdge(it, if (random.nextBoolean()) -1 else -2, 401.0) } + type2Terminals.map { WeightedEdge(it, if (random.nextBoolean()) -1 else -2, 700.0) } + WeightedEdge(-1, -2, round(random.nextDouble() * 300.0))).toSet()
+        )
+
+        return Triple(ring, tree, terminals)
     }
 }

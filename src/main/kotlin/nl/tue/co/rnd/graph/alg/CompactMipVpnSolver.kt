@@ -6,7 +6,7 @@ import nl.tue.co.rnd.graph.WeightedGraph
 import nl.tue.co.rnd.graph.alg.GeneralizedVpnSolver.VpnResult
 
 class CompactMipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandTree: WeightedGraph<V>,
-                             override val terminals: Set<V>) : GeneralizedVpnSolver<V> {
+                             override val terminals: Set<V>, private val env: GRBEnv = GRBEnv()) : GeneralizedVpnSolver<V> {
 
     override fun computeSolution(): VpnResult<V> {
         val terminalsList = terminals.toList()
@@ -18,14 +18,15 @@ class CompactMipVpnSolver<V>(override val graph: WeightedGraph<V>, override val 
             }
         }
 
-        val env = GRBEnv(true)
         env.start()
 
         val (model, _, _, _) = buildModel(env, terminalSequence)
 
+        model.set(GRB.IntParam.OutputFlag, 0)
+
         model.optimize()
 
-        return VpnResult(model.get(GRB.DoubleAttr.ObjVal))
+        return VpnResult(model.get(GRB.DoubleAttr.ObjVal), model)
     }
 
     private fun buildModel(env: GRBEnv, terminalSequence: Sequence<Pair<V, V>>): Problem<V> {

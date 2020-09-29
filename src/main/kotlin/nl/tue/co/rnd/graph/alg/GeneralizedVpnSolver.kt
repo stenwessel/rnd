@@ -1,5 +1,6 @@
 package nl.tue.co.rnd.graph.alg
 
+import gurobi.GRBModel
 import nl.tue.co.rnd.graph.WeightedGraph
 
 interface GeneralizedVpnSolver<V> {
@@ -10,5 +11,5 @@ interface GeneralizedVpnSolver<V> {
 
     fun computeSolution(): VpnResult<V>
 
-    data class VpnResult<V>(val cost: Double)
+    data class VpnResult<V>(val cost: Double, val model: GRBModel)
 }

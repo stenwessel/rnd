@@ -61,7 +61,7 @@ class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandT
             break
         }
 
-        return VpnResult(masterProblem.get(GRB.DoubleAttr.ObjVal))
+        return VpnResult(masterProblem.get(GRB.DoubleAttr.ObjVal), masterProblem)
     }
 
     private fun buildMasterProblem(env: GRBEnv, terminalSequence: Sequence<Pair<V, V>>): MasterProblem<V> {
