@@ -11,4 +11,6 @@ class WeightedEdge<V>(first: V, second: V, val weight: Double) : Edge<V>(first, 
     override fun hashCode(): Int {
         return Edge(this.first, this.second).hashCode()
     }
+
+    override fun toString() = "{$first,$second}[$weight]"
 }
