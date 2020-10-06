@@ -1,0 +1,222 @@
+%! Author = Sten
+%! Date = 29-09-2020
+
+% Preamble
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% Packages
+\usepackage[fleqn]{amsmath}
+
+\input{macros.tex}
+
+\theoremstyle{definition}
+\newtheorem{fact}{Fact}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+
+\title{Extending the ring network proof}
+\author{David Dekker \and Sten Wessel}
+\date{\today}
+
+% Document
+\begin{document}
+    \maketitle
+    \hrule
+    \medskip
+
+    \section{Introduction}
+    The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where the considered network is a ring.
+    In the following, we will discuss whether it is possible to extend the proof to the generalized VPN conjecture, for the cases where the network is a ring and the demand tree is a \emph{two-union star}: the tree formed by connecting the centers of two star graphs.
+
+    Some background of what steps we are taking is identical to what is described in \cite{grandoni2008short} and we will omit these details.
+    We focus on showing the differences that are necessary in the proof to adapt to the generalized VPN problem setting.
+    We use the same notation as used in the aforementioned paper, except where the generalized VPN problem differs from the VPN problem.
+
+    \section{Generalized VPN setting}
+    We consider an undirected graph $G = (V_G, E_G)$ with non-negative edge costs $c\colon E_G \to \reals_+$.
+    A subset of the vertices are terminals $W \subseteq V_G$
+    Traffic demands between terminals are be described by symmetric matrices $D = (d_ij)_{i,j \in W}$, where the non-negative entries $d_{ij} = d_{ji}$ describe the (undirected) traffic between two terminals $i,j \in W$.
+    We assume the diagonal to be zero, i.e.\ $d_{ii} = 0$ for all $i \in W$.
+    We define a universe of traffic demand matrices $\mathcal U_T$ that is described by an edge-capacitated tree $T = (V_T, E_T)$ with leaf set equal to the terminals $W$ and edge capacities $b\colon E_T \to \reals_+$.
+    A traffic matrix belongs to $\mathcal U_T$ when it can be routed on $T$.
+
+    A solution to the \emph{generalized VPN problem} defined by $(G, c, W, T, b)$ consists of a \emph{routing template} $\set{P_{ij}}_{i,j \in \binom{W}{2}}$ ($i$-$j$-paths in $G$ for each unordered pair of terminals), and `bought' edge capacities $u(e) \ge 0$ for all $e \in E_G$.
+    A solution is \emph{feasible} all traffic demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template, and without exceeding the edge capacities $u$.
+    A solution is \emph{optimal} if it is feasible and minimizes $\sum_{e \in E_G} c(e) u(e)$.
+
+    Note that the generalized VPN problem is equivalent to an original VPN problem instance when $T$ is a star.
+
+    % TODO: define tree solution
+
+    \subsection{Two-union star demand trees}
+    For the remainder, we restrict ourselves to instances where $T$ is a \emph{two-union star}, that is, a tree formed by connecting the centers $r_1,\ r_2$ of two star graphs.
+    We will call this edge $r = \set{r_1, r_2}$ and refer to it as the \emph{bridge} of $T$.
+
+    \section{Preliminaries}
+    A number of assumptions are made in \cite{grandoni2008short}, the most important being that we can assume the capacities $b \equiv 1$.
+    We suspect this does not quite generalize to our case, but we can state the following:
+
+    \begin{fact}
+        We may assume $b(f) = 1$ when $f \neq r$.
+    \end{fact}
+    Using the same motivation as in \cite{grandoni2008short}, if the capacity $b(iu)$ for the terminal $i \in W$ is not unit, construct a new instance with new terminals $i_1, \dots, i_{b(iu)}$, connected to the site of $i$ in $G$, with edge cost $0$.
+    Set the capacities of the incident edges in $T$ to unit.
+    Note that this instance is equivalent, but may change the topology of the graph.
+
+    An alternative construction is argued in \cite{grandoni2008short} to keep the topology a ring and we refer to this paper for the motivation.
+
+    \begin{fact}
+        We can assume $b$ to be integral.
+    \end{fact}
+    This is motivated by scaling by a sufficiently large factor (excluding weird irrational cases, but that is probably fine).
+
+    % TODO: not sure if this is useful
+%    \paragraph{Bound on bridge capacity}
+%    Let $\set{r_1, r_2}$ be the bridge.
+%    Let $W_1, W_2 \subseteq W$ denote the terminals connected to $r_1$ and $r_2$ in $T$, respectively.
+%    Using that all capacities are unit (except for the bridge), we know that the maximum edge capacity is $\min\set{ |W_1|, |W_2| }$.
+%    We motivate this as follows: the maximum amount of traffic that can cross the bridge is $\min\set{ |W_1|, |W_2| }$, hence no additional traffic matrices can be routed on a tree with larger bridge capacity.
+%    Hence, trees with larger bridge capacity describe the same universe as using a tree with the argued maximum edge capacity.
+
+    \section{Pyramidal Routing problem}
+    To goal is to show that there exists an optimal solution to the generalized VPN problem that is a tree solution (or, equivalently, there exists a tree solution to the generalized VPN problem that is optimal).
+    Consider an optimal tree solution $(\set{P_{ij}}, u)$ to a generalized VPN instance $(G, c, W, T, b)$, with $|W| = k$ and $T$ a two-union star with the unit capacity assumption as above.
+    Let $\mathcal P_i$ be as in \cite{grandoni2008short} for a fixed $i \in W$.
+    In our setting, we have a different expression for the \emph{required} capacity of edge $e$:
+    \[
+        u(e) = \begin{cases}
+                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i)} & \text{if $m(e, \mathcal P_i) \le b(r)$,} \\
+                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i), b(r)} & \text{otherwise,}
+        \end{cases}
+    \]
+    where
+    \begin{gather*}
+        n(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij}}|,\\
+        m(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij},\ r \in \pi_T(i, j)}|,
+    \end{gather*}
+    that is, $m(e, \mathcal P_i)$ is the number of paths in $\mathcal P_i$ containing $e$, \emph{while simultaneously the path in the demand tree between $i$ and $j$ crosses the bridge}.
+    We refer to Figure~1 of \cite{grandoni2008short} for an explanation of the first case.
+    For the latter, notice here that the bridge limits the required capacity and is hence added to the minimum.
+    Besides some examples, we have no good proof why this expression is actually correct.
+
+    We can now formulate the generalized Pyramidal Routing (\emph{genPR}) problem with instance $(G, c, W, T, b, i)$ as to minimize $\sum_{e \in E_G} c(e) y(e, \mathcal P_i)$ over all $\mathcal P_i$ (for an arbitrary fixed $i \in W$), where we define
+    \[
+        y(e, \mathcal P_i) = \begin{cases}
+                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i)} & \text{if $m(e, \mathcal P_i) \le b(r)$,} \\
+                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i), b(r)} & \text{otherwise.}
+        \end{cases}
+    \]
+
+    We now formulate our version of Conjecture~2 (as in \cite{grandoni2008short}).
+    \renewcommand\theconjecture{2}
+    \begin{conjecture}[The \emph{genPR} conjecture]
+        For each \emph{genPR} instance $(G, C, W, i, T, b)$ there exists an optimal solution which is a tree solution.
+    \end{conjecture}
+
+    We now show our version of Theorem~1 (having the same formulation as in \cite{grandoni2008short}), using the equivalent of Lemma~3, Claim~1, and Claim~2.
+
+    \renewcommand\thelemma{3}
+    \begin{lemma}
+        Consider an generalized VPN instance $(G, c, W, T, b)$ with $T$ a two-union star with bridge $r$, $b(f) = 1$ for $f \neq r$, and some feasible solution $(\set{P_{ij}}, u)$.
+        There exists a terminal $i \in W$ such that $\sum_{e \in E_G} c(e) u(e) \ge \sum_{e \in E_G} c(e) y(e, \mathcal P_i)$, where $\mathcal P_i = \set{P_{ij} : j \in W \setminus \set{i}}$.
+    \end{lemma}
+    \begin{proof}
+        Fix an edge $e \in E_G$.
+        We define the same traffic matrix $D^e = (d^e_{ij})_{i,j \in W}$ as in \cite{grandoni2008short},
+        \[
+            d^e_{ij} = \begin{cases}
+                           \frac 1 k \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) & \text{if $e \in P_{ij}$,} \\
+                           0 & \text{otherwise.}
+            \end{cases}
+        \]
+
+        Before we start with the proof of (our equivalent of) Claim~1, we first show:
+
+        \renewcommand\theclaim{0}
+        \begin{claim}
+            $y(e, \mathcal P_i) \le b(r) \frac{n(e, \mathcal P_i)}{m(e, \mathcal P_i)}$.
+        \end{claim}
+        \begin{proof}
+            We consider the two cases of $y(e, \mathcal P_i)$:
+            \begin{itemize}
+                \item If $m(e, \mathcal P_i) \le b(r)$, then
+                \[
+                    y(e, \mathcal P_i) \le n(e, \mathcal P_i) \le n(e, \mathcal P_i) \frac{b(r)}{m(e, \mathcal P_i)}.
+                \]
+                as $m(e, \mathcal P_i) \le b(r)$ by assumption.
+                \item If $m(e, \mathcal P_i) > b(r)$, then
+                \[
+                    y(e, \mathcal P_i) \le b(r) \le b(r) \frac{n(e, \mathcal P_i)}{m(e, \mathcal P_i)}
+                \]
+                as $n(e, \mathcal P_i) \le m(e, \mathcal P_i)$ holds by definition.\qedhere
+            \end{itemize}
+        \end{proof}
+
+        Now, the proof of Claim~1 is slightly different, as our universe is described by a different set of inequalities.
+
+        \renewcommand\theclaim{1}
+        \begin{claim}
+            $D^e \in \mathcal U_T$, that is
+            \[
+                \sum_{\substack{ij \in \binom{W}{2},\\f \in \pi_T(i,j)}} d^e_{ij} \le b(f)
+            \]
+            for all $f \in E_T$.
+        \end{claim}
+        \begin{proof}
+            We consider two cases:
+            \begin{itemize}
+                \item $f \neq r$, hence we can write $f = f_i$, where $f_i \in E_T$ is the edge incident some terminal $i \in W$.
+                Now note that we can write
+                \[
+                    \sum_{\substack{\ell j \in \binom{W}{2},\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} = \sum_{j \in W \setminus \set{i}} d^e_{ij}
+                \]
+                as $f_i$ is exactly in all paths from/to $i$ in the tree, as it is the edge incident to $i$.
+                The rest of this case follows the same steps as the proof in \cite{grandoni2008short}:
+                \[
+                    \begin{split}
+                        \sum_{\substack{\ell j \in \binom{W}{2},\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} &= \sum_{j \in W \setminus \set{i}} d^e_{ij} \\
+                        &= \frac 1 k \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                        &\le \frac 1 k \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} \left( \frac{k - n(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{n(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                        &= \frac{1}{n(e, \mathcal P_i)} \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} 1 \\
+                        &= 1 \\
+                        &= b(f_i).
+                    \end{split}
+                \]
+
+                \item $f = r$.
+                The following looks more daunting than it actually is, but it is quite technical.
+                If anything is unclear, we would be happy to explain in the meeting.
+                In the third line, we exchange the order of the two sums and use the symmetry of $\pi_T(i, j)$ and $P_{ij}$.
+                \[
+                    \begin{split}
+                        \sum_{\substack{ij \in \binom{W}{2},\\r \in \pi_T(i,j)}} d^e_{ij} &= \frac 1 2 \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j)}} d^e_{ij} \\
+                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{j \in W} \sum_{\substack{i \in W \setminus \set{j},\\r \in \pi_T(j,i),\\e \in P_{ji}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                        &= \frac{1}{k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \\
+                        &= \frac{1}{k} \sum_{i \in W} \left( m(e, \mathcal P_i) \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \right) \\
+                        &\stackrel{\text{Claim 0}}{\le} \frac{1}{k} \sum_{i \in W} b(r) \\
+                        &= b(r).
+                    \end{split}
+                \] \qedhere
+            \end{itemize}
+
+        \end{proof}
+        The remainder of the proof of Lemma~3 (and Claim~2) is exactly the same as in \cite{grandoni2008short}, as the definition of $D^e$ is exactly the same, and the definition of $y(e, \mathcal P_i)$ itself is not used.
+    \end{proof}
+
+    From this follows (our version of) Theorem~1, stating that on ring networks, if there exists an optimal tree solution for the \emph{genPR} problem, that also an optimal tree solution exists for the generalized VPN problem.
+
+    Now, what remains to show is that indeed an optimal tree solution exists for the \emph{genPR} problem when $G$ is a ring.
+    If we follow the structure of the proof in \cite{grandoni2008short}, not first that Claim~3 also holds for our case.
+    However, Claim~4 does not hold: it might be thay $y(e, \mathcal P_i) = y(f, \mathcal P_i) = b(r)$ (in the second case of the definition of $y$).
+    We have not quite yet mastered the inductive proof that follows (in which Claim~4) is used.
+    Therefore, we are not sure that the counterexample for Claim~4 is actually problematic, or how to circumvent this issue.
+
+    \bibliographystyle{plain}
+    \bibliography{references}
+
+\end{document}

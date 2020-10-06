@@ -1,0 +1,36 @@
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{amsfonts}
+\usepackage{etoolbox}
+\usepackage{enumerate}
+\usepackage{scalerel}
+\usepackage{stackengine}
+\usepackage{xifthen}
+\usepackage{lmodern}
+\usepackage{gensymb}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{bbm}
+\usepackage{xargs}
+\usepackage{algorithm}
+\usepackage{diagbox}
+\usepackage{subcaption}
+\usepackage[table]{xcolor}
+\usepackage[noend]{algpseudocode}
+\usepackage{polynom}
+
+\newcommand{\naturals}{\mathbb{N}}
+\newcommand{\integers}{\mathbb{Z}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\rationals}{\mathbb{Q}}
+
+\DeclarePairedDelimiterX{\set}[1]\lbrace\rbrace{\setaux #1||\endsetaux}
+\def\setaux#1|#2|#3\endsetaux{\if\relax\detokenize{#2}\relax #1 \else #1 \;\delimsize\vert\; #2 \fi}
+
+% Q.E.D.
+\renewcommand{\qedsymbol}{\footnotesize$\boxempty$ \textsc{q.\,e.\,d.}}
