@@ -115,22 +115,51 @@ internal class PetersenGraphTest {
 
     @Test
     fun interesting() {
+        val graph = petersen()
+        val env = GRBEnv(true)
+
+        val file = File("interesting.csv")
+        file.appendText("terminals,partition,bridgeWeight,relax,mip\n")
+
         val interesting = listOf(
-                142,
-                220,
-                333,
-                367,
-                381,
-                642,
-                656,
-                690,
-                803,
-                881
+                "0110011110" to "010100",
+                "0110011111" to "0101001",
+                "0110011111" to "0101011",
+                "0110111110" to "0100100",
+                "0111011111" to "01101001",
+                "1110011111" to "00101001",
+                "1110011111" to "00101011",
+                "1110101101" to "0101111",
+                "1110110101" to "0100011",
+                "1110111101" to "01010111",
+                "1110111101" to "01011111",
+                "1111011111" to "001001001",
+                "1111101101" to "00100110",
+                "1111101101" to "00110110",
+                "1111101111" to "001001100",
+                "1111111111" to "0010001110",
+                "1111111111" to "0011011100",
+                "1111111111" to "0101001101",
+                "1111111111" to "0101101111",
+                "1111111111" to "0101111101",
         )
 
-        for (i in interesting) {
-            val partition = i.toString(radix = 2).padStart(10, '0')
-            println("$partition")
+        for ((terminalsBitStr, partition) in interesting) {
+            val terminals = terminalsBitStr.mapIndexedNotNull { index, c -> if (c == '1') index + 1 else null }
+            val terminalsSet = terminals.toSet()
+            val weight = 1.0
+
+            val demandTree = WeightedGraph(
+                    setOf(-1, -2) + terminals,
+                    partition.mapIndexed { j, side -> WeightedEdge(terminals[j], side.toInt() - 48 - 2, 1.0) }.toSet() + WeightedEdge(-1, -2, weight)
+            )
+
+            val (mip, model) = CompactMipVpnSolver(graph, demandTree, terminalsSet, env).computeSolution()
+            val relax = model.relax()
+
+            relax.optimize()
+
+            file.appendText("$terminalsBitStr,$partition,$weight,${relax.get(GRB.DoubleAttr.ObjVal)},${round(mip)}\n")
         }
     }
 
