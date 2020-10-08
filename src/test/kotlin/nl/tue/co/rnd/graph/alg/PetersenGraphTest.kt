@@ -71,9 +71,10 @@ internal class PetersenGraphTest {
                     WeightedEdge(9, 11, outerWeight),
                     WeightedEdge(10, 11, outerWeight),
             )
-            val vertexGroups1 = petersen.edges.toList().mapIndexed{ j, e -> setOf(e.first) + petersen.neighbors(e.first) - setOf(e.second) }
-            val vertexGroups2 = petersen.edges.toList().mapIndexed{ j, e -> petersen.neighbors(e.second) + setOf(e.second) - setOf(e.first)  }
-            val vertexGroups = vertexGroups1 + vertexGroups2
+//            val vertexGroups1 = petersen.edges.toList().mapIndexed{ j, e -> setOf(e.first) + petersen.neighbors(e.first) - setOf(e.second) }
+//            val vertexGroups2 = petersen.edges.toList().mapIndexed{ j, e -> petersen.neighbors(e.second) + setOf(e.second) - setOf(e.first)  }
+//            val vertexGroups = vertexGroups1 + vertexGroups2
+            val vertexGroups = petersen.edges.toList().mapIndexed{ j, e -> if (choices.get(j) == '1') setOf(e.first) + petersen.neighbors(e.first) - setOf(e.second) else petersen.neighbors(e.second) + setOf(e.second) - setOf(e.first) }
 
             var currentVertex = root + 1
             var currentInternalNode = -2
@@ -112,11 +113,11 @@ internal class PetersenGraphTest {
     fun laurasPotentialCounterexample() {
         val random = Random(1988)
 
-//        for (i in 1 until 0b100000000000000) {
+        for (i in 1 until 0b100000000000000) {
             val k = random.nextInt(0b100000000000000)
             val choices = k.toString(radix = 2).padStart(15, '0')
             println(choices)
-            val (graph, demandTree, terminals) = modifiedPetersen(1.0, 2.0, choices, 3.0, 2.0, 1.0)
+            val (graph, demandTree, terminals) = modifiedPetersen(1.0, 2.0, choices, 3.0, 1.0, 1.0)
 
 //            val enum = EnumerateHH(graph, demandTree, terminals).computeSolution().cost
 //            println(enum)
@@ -127,7 +128,7 @@ internal class PetersenGraphTest {
 //            assertEquals(enum, dp, "Enum and DP do not match for choices $choices")
             assertEquals(dp, round(mip), "MIP does not match for choices $choices")
 
-//        }
+        }
 //        val terminalGroups = petersonEdges.map
     }
 
