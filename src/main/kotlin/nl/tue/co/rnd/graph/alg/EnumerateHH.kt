@@ -9,7 +9,7 @@ class EnumerateHH<V>(override val graph: WeightedGraph<V>, override val demandTr
         val mapping: MutableMap<V, V> = terminals.zip(terminals).toMap(HashMap())
 
         val treeInternals = demandTree.vertices - terminals
-        val distanceInGraph = FloydWarshall(graph).computeShortestPaths()
+        val (distanceInGraph, _) = FloydWarshall(graph).computeShortestPaths()
 
         return recursiveAssign(treeInternals, mapping, distanceInGraph)
     }

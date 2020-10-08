@@ -2,19 +2,27 @@ package nl.tue.co.rnd.graph.alg
 
 import nl.tue.co.rnd.graph.WeightedGraph
 
+typealias Path<V> = List<V>
+
 class FloydWarshall<V>(val graph: WeightedGraph<V>) {
 
-    fun computeShortestPaths(): Map<Pair<V, V>, Double> {
+    fun computeShortestPaths(): Pair<Map<Pair<V, V>, Double>, Map<Pair<V, V>, Path<V>>> {
         val distance: MutableMap<Pair<V, V>, Double> = graph.vertices.product(graph.vertices)
                 .map { it to Double.POSITIVE_INFINITY }.toMap().toMutableMap()
+
+        val next: MutableMap<Pair<V, V>, V?> = graph.vertices.product(graph.vertices)
+                .map { it to null }.toMap().toMutableMap()
 
         for (edge in graph.edges) {
             distance[edge.first to edge.second] = edge.weight
             distance[edge.second to edge.first] = edge.weight
+            next[edge.first to edge.second] = edge.second
+            next[edge.second to edge.first] = edge.first
         }
 
         for (vertex in graph.vertices) {
             distance[vertex to vertex] = 0.0
+            next[vertex to vertex] = vertex
         }
 
         for (k in graph.vertices) {
@@ -23,12 +31,32 @@ class FloydWarshall<V>(val graph: WeightedGraph<V>) {
                     if (distance[i to j]!! > distance[i to k]!! + distance[k to j]!!) {
                         distance[i to j] = distance[i to k]!! + distance[k to j]!!
                         distance[j to i] = distance[i to k]!! + distance[k to j]!!
+
+                        next[i to j] = next[i to k]
+                        next[j to i] = next[j to k]
                     }
                 }
             }
         }
 
-        return distance
+        val paths = graph.vertices.product(graph.vertices)
+                .map { it to path(it.first, it.second, next) }
+                .toMap()
+
+        return distance to paths
+    }
+
+    private fun path(u: V, v: V, next: Map<Pair<V, V>, V?>): Path<V> {
+        if (next[u to v] == null) return emptyList()
+
+        val path = mutableListOf(u)
+        var currentVertex = u
+        while (currentVertex != v) {
+            currentVertex = next[currentVertex to v] ?: error("Path is broken")
+            path += currentVertex
+        }
+
+        return path
     }
 }
 

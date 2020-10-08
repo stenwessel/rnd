@@ -1,21 +1,17 @@
 package nl.tue.co.rnd.graph.random
 
+import nl.tue.co.rnd.graph.RegularVPNInstance
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
-import kotlin.math.floor
-import kotlin.math.ln
+import kotlin.math.*
 import kotlin.random.Random
+import kotlin.random.asJavaRandom
 import kotlin.random.nextInt
 
 class RandomDemandTreeGenerator {
-    fun generateWithRandomTerminals(random: Random, possibleTerminals: Set<Int>): WeightedGraph<Int> {
-        require(possibleTerminals.all { it >= 0 })
 
-        val terminals = repeatUntil({ it.size >= 4 }) { // Not 2 because we have covered all other cases already
-            possibleTerminals.filter { random.nextBoolean() }
-        }
-
-        val internalNodesNum = random.nextInt(3 until terminals.size) // [3, terminals.size - 1]
+    private fun generateTree(random: Random, terminals: Collection<Int>, internalNodesRange: IntRange, internalEdgeWeight: (Int, Int, Random) -> Double, terminalEdgeWeight: (Int, Int, Random) -> Double = internalEdgeWeight): WeightedGraph<Int> {
+        val internalNodesNum = random.nextInt(internalNodesRange)
         val todoInternalNodes = ArrayDeque((-1 downTo -internalNodesNum).toList())
 
         val processedInternalNodes = mutableListOf(todoInternalNodes.removeFirst())
@@ -25,7 +21,7 @@ class RandomDemandTreeGenerator {
             val newVertex = todoInternalNodes.removeFirst()
             val oldVertex = processedInternalNodes.random(random)
 
-            tree.add(WeightedEdge(newVertex, oldVertex, random.sampleGeometric(0.4))) // Very very random
+            tree.add(WeightedEdge(newVertex, oldVertex, internalEdgeWeight(newVertex, oldVertex, random))) // Very very random
 
             processedInternalNodes.add(newVertex)
         }
@@ -33,7 +29,7 @@ class RandomDemandTreeGenerator {
         // Glue the terminals
         for (terminal in terminals) {
             val buddy = processedInternalNodes.random(random)
-            tree.add(WeightedEdge(terminal, buddy, random.sampleGeometric(0.4)))
+            tree.add(WeightedEdge(terminal, buddy, terminalEdgeWeight(terminal, buddy, random)))
         }
 
         val adjacencyList = mutableMapOf<Int, MutableList<Pair<Int, WeightedEdge<Int>>>>()
@@ -64,6 +60,22 @@ class RandomDemandTreeGenerator {
         }
 
         return WeightedGraph((terminals + processedInternalNodes).toSet(), tree)
+    }
+
+    fun generateWithRandomTerminals(random: Random, possibleTerminals: Set<Int>): WeightedGraph<Int> {
+        require(possibleTerminals.all { it >= 0 })
+
+        val terminals = repeatUntil({ it.size >= 4 }) { // Not 2 because we have covered all other cases already
+            possibleTerminals.filter { random.nextBoolean() }
+        }
+
+        return generateTree(random, terminals, 3 until terminals.size, { _, _, r -> r.sampleGeometric(0.4) })
+    }
+
+    fun generateFromRegularVPN(random: Random, instance: RegularVPNInstance<Int>): WeightedGraph<Int> {
+        val avg = instance.terminalCapacity.values.average()
+        val sd = sqrt(instance.terminalCapacity.values.sumOf { (it - avg) * (it - avg) } / (instance.terminalCapacity.size - 1))
+        return generateTree(random, instance.terminalCapacity.keys, 2 until instance.terminalCapacity.size, { _, _, rnd -> round(max(1.0, rnd.asJavaRandom().nextGaussian() * sd + avg)) }, { t, _, _ -> instance.terminalCapacity[t] ?: 1.0 })
     }
 }
 

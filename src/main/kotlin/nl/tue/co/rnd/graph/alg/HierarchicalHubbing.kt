@@ -1,5 +1,6 @@
 package nl.tue.co.rnd.graph.alg
 
+import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 
 interface HierarchicalHubbing<V> {
@@ -10,5 +11,7 @@ interface HierarchicalHubbing<V> {
 
     fun computeSolution(): HubbingResult<V>
 
-    data class HubbingResult<V>(val cost: Double, val mappings: Set<Map<V, V>>)
+    data class HubbingResult<V>(val cost: Double, val mappings: Set<Map<V, V>>,
+                                val routingTemplate: Map<Pair<V, V>, List<V>> = emptyMap(),
+                                val boughtCapacity: Map<WeightedEdge<V>, Double> = emptyMap())
 }

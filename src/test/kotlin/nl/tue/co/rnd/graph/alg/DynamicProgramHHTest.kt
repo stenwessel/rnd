@@ -27,8 +27,9 @@ internal class DynamicProgramHHTest {
 
         val terminals = setOf(1, 2, 3, 4)
 
-        val (cost, mappings) = EnumerateHH(graph, demandTree, terminals).computeSolution()
+        val solution = DynamicProgramHH(graph, demandTree, terminals, backtrack = true).computeSolution()
+        val mip = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
 
-        assertEquals(11.0, cost)
+        assertEquals(11.0, solution.cost)
     }
 }

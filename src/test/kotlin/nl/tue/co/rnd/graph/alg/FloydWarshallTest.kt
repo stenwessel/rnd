@@ -12,7 +12,7 @@ internal class FloydWarshallTest {
     fun computeShortestPathsOnPath() {
         val graph = WeightedGraph(setOf(1, 2, 3), setOf(WeightedEdge(1, 2, 2.0), WeightedEdge(2, 3, 3.0)))
 
-        val distance = FloydWarshall(graph).computeShortestPaths()
+        val (distance, _) = FloydWarshall(graph).computeShortestPaths()
 
         for (pair in graph.vertices.product(graph.vertices)) {
             assertEquals(distance[pair.first to pair.second], distance[pair.second to pair.first], "Distances are not symmetric.")
@@ -33,7 +33,7 @@ internal class FloydWarshallTest {
                                                               WeightedEdge(5, 6, 5.0), WeightedEdge(1, 6, 4.0)
         ))
 
-        val distance = FloydWarshall(graph).computeShortestPaths()
+        val (distance, _) = FloydWarshall(graph).computeShortestPaths()
 
         for (pair in graph.vertices.product(graph.vertices)) {
             assertEquals(distance[pair.first to pair.second], distance[pair.second to pair.first], "Distances are not symmetric.")

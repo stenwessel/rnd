@@ -4,11 +4,24 @@ import gurobi.*
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 import nl.tue.co.rnd.graph.alg.GeneralizedVpnSolver.VpnResult
+import nl.tue.co.rnd.graph.findPathInTree
 
 class CompactMipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandTree: WeightedGraph<V>,
                              override val terminals: Set<V>, private val env: GRBEnv = GRBEnv()) : GeneralizedVpnSolver<V> {
 
+    val problem by lazy { buildProblem() }
+
     override fun computeSolution(): VpnResult<V> {
+        val (model, _, _, _) = problem
+
+        model.set(GRB.IntParam.OutputFlag, 0)
+
+        model.optimize()
+
+        return VpnResult(model.get(GRB.DoubleAttr.ObjVal), model)
+    }
+
+    private fun buildProblem(): Problem<V> {
         val terminalsList = terminals.toList()
         val terminalSequence = sequence {
             for (i in terminalsList.indices) {
@@ -20,16 +33,6 @@ class CompactMipVpnSolver<V>(override val graph: WeightedGraph<V>, override val 
 
         env.start()
 
-        val (model, _, _, _) = buildModel(env, terminalSequence)
-
-        model.set(GRB.IntParam.OutputFlag, 0)
-
-        model.optimize()
-
-        return VpnResult(model.get(GRB.DoubleAttr.ObjVal), model)
-    }
-
-    private fun buildModel(env: GRBEnv, terminalSequence: Sequence<Pair<V, V>>): Problem<V> {
         val model = GRBModel(env)
 
         model.set(GRB.IntAttr.ModelSense, GRB.MINIMIZE)
@@ -106,35 +109,11 @@ class CompactMipVpnSolver<V>(override val graph: WeightedGraph<V>, override val 
         // Do this the lazy way
         return terminalSequence.map {
             val (i, j) = it
-
-            val visited = mutableMapOf<V, Set<WeightedEdge<V>>>(i to emptySet())
-            val boundary = ArrayDeque<WeightedEdge<V>>()
-            boundary.addAll(demandTree.incidentEdges(i))
-
-            while (boundary.isNotEmpty()) {
-                val currentEdge = boundary.removeFirst()
-
-                val discovered = if (currentEdge.first !in visited) currentEdge.first else currentEdge.second
-                val from = if (currentEdge.first !in visited) currentEdge.second else currentEdge.first
-
-                visited[discovered] = visited[from]!! + currentEdge
-
-                if (discovered == j) {
-                    return@map it to visited[discovered]!!
-                }
-
-                for (newEdge in demandTree.incidentEdges(discovered)) {
-                    if (newEdge == currentEdge) continue
-
-                    boundary.addLast(newEdge)
-                }
-            }
-
-            it to emptySet()
+            it to findPathInTree(i, j, demandTree)
         }.toMap()
     }
 
-    private data class Problem<V>(val model: GRBModel,
+    data class Problem<V>(val model: GRBModel,
                                   val u: Map<WeightedEdge<V>, GRBVar>,
                                   val fMin:  Map<Triple<WeightedEdge<V>, V, V>, GRBVar>,
                                   val fPlus:  Map<Triple<WeightedEdge<V>, V, V>, GRBVar>)

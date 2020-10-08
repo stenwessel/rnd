@@ -73,7 +73,8 @@ internal class HierarchicalHubbingTest {
         val terminals = setOf(1, 2, 3, 4, 5, 6)
 
         val (costEnum, _) = EnumerateHH(graph, demandTree, terminals).computeSolution()
-        val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
+        val dp = DynamicProgramHH(graph, demandTree, terminals, backtrack = true).computeSolution()
+        val (costDp, _) = dp
 
         val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
         val (costCompactMip) = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
@@ -107,7 +108,8 @@ internal class HierarchicalHubbingTest {
         val terminals = setOf(1, 2, 3)
 
         val (costEnum, _) = EnumerateHH(graph, demandTree, terminals).computeSolution()
-        val (costDp, _) = DynamicProgramHH(graph, demandTree, terminals).computeSolution()
+        val dp = DynamicProgramHH(graph, demandTree, terminals, backtrack = true).computeSolution()
+        val (costDp, _) = dp
 
         val (costMip) = MipVpnSolver(graph, demandTree, terminals).computeSolution()
         val (costCompactMip) = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution()
