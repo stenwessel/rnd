@@ -38,6 +38,97 @@ internal class PetersenGraphTest {
                     )
             )
         }
+
+        private fun modifiedPetersen(innerWeight: Double, outerWeight: Double, choices: String, demandRootWeight : Double, demandInnerWeight : Double, demandLeafWeight : Double): Triple<WeightedGraph<Int>, WeightedGraph<Int>, Set<Int>> {
+            val petersen = petersen()
+
+            val root = 11
+            val vertices = (1..11).toMutableSet()
+            val edges = mutableSetOf(
+                    WeightedEdge(1, 2, innerWeight),
+                    WeightedEdge(2, 3, innerWeight),
+                    WeightedEdge(3, 4, innerWeight),
+                    WeightedEdge(4, 5, innerWeight),
+                    WeightedEdge(5, 1, innerWeight),
+                    WeightedEdge(1, 6, innerWeight),
+                    WeightedEdge(2, 7, innerWeight),
+                    WeightedEdge(3, 8, innerWeight),
+                    WeightedEdge(4, 9, innerWeight),
+                    WeightedEdge(5, 10, innerWeight),
+                    WeightedEdge(6, 8, innerWeight),
+                    WeightedEdge(8, 10, innerWeight),
+                    WeightedEdge(10, 7, innerWeight),
+                    WeightedEdge(7, 9, innerWeight),
+                    WeightedEdge(9, 6, innerWeight),
+                    WeightedEdge(1, 11, outerWeight),
+                    WeightedEdge(2, 11, outerWeight),
+                    WeightedEdge(3, 11, outerWeight),
+                    WeightedEdge(4, 11, outerWeight),
+                    WeightedEdge(5, 11, outerWeight),
+                    WeightedEdge(6, 11, outerWeight),
+                    WeightedEdge(7, 11, outerWeight),
+                    WeightedEdge(8, 11, outerWeight),
+                    WeightedEdge(9, 11, outerWeight),
+                    WeightedEdge(10, 11, outerWeight),
+            )
+            val vertexGroups1 = petersen.edges.toList().mapIndexed{ j, e -> setOf(e.first) + petersen.neighbors(e.first) - setOf(e.second) }
+            val vertexGroups2 = petersen.edges.toList().mapIndexed{ j, e -> petersen.neighbors(e.second) + setOf(e.second) - setOf(e.first)  }
+            val vertexGroups = vertexGroups1 + vertexGroups2
+
+            var currentVertex = root + 1
+            var currentInternalNode = -2
+
+            val terminals = mutableSetOf<Int>()
+            val demandTreeVertices = mutableSetOf(0, -1)
+            val demandTreeEdges = mutableSetOf<WeightedEdge<Int>>()
+
+            demandTreeEdges += WeightedEdge(0, -1, demandRootWeight)
+
+            for (group in vertexGroups) {
+                demandTreeVertices += currentInternalNode
+
+                for (vertex in group) {
+                    vertices += currentVertex
+                    terminals += currentVertex
+                    demandTreeVertices += currentVertex
+                    edges += WeightedEdge(vertex, currentVertex, 0.0)
+                    demandTreeEdges += WeightedEdge(currentVertex, currentInternalNode, demandLeafWeight)
+
+                    currentVertex++
+                }
+
+                demandTreeEdges += WeightedEdge(-1, currentInternalNode, demandInnerWeight)
+                currentInternalNode--
+            }
+
+            val modifiedPetersen = WeightedGraph(vertices, edges)
+            val demandTree = WeightedGraph(demandTreeVertices, demandTreeEdges)
+
+            return Triple(modifiedPetersen, demandTree, terminals)
+        }
+    }
+
+    @Test
+    fun laurasPotentialCounterexample() {
+        val random = Random(1988)
+
+//        for (i in 1 until 0b100000000000000) {
+            val k = random.nextInt(0b100000000000000)
+            val choices = k.toString(radix = 2).padStart(15, '0')
+            println(choices)
+            val (graph, demandTree, terminals) = modifiedPetersen(1.0, 2.0, choices, 3.0, 2.0, 1.0)
+
+//            val enum = EnumerateHH(graph, demandTree, terminals).computeSolution().cost
+//            println(enum)
+            val dp = DynamicProgramHH(graph, demandTree, terminals).computeSolution().cost
+            val mip = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution().cost
+
+
+//            assertEquals(enum, dp, "Enum and DP do not match for choices $choices")
+            assertEquals(dp, round(mip), "MIP does not match for choices $choices")
+
+//        }
+//        val terminalGroups = petersonEdges.map
     }
 
     @Test
