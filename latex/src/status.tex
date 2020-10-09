@@ -1,0 +1,82 @@
+%! Author = Sten
+%! Date = 09-10-2020
+
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% Packages
+\usepackage[fleqn]{amsmath}
+
+\input{macros.tex}
+
+\title{\textbf{Generalized VPN project}\\State of affairs}
+\author{David Dekker \and Sten Wessel}
+\date{\today}
+
+% Document
+\begin{document}
+    \maketitle
+    \hrule
+
+    \section{Introduction}
+
+    \section{Implemented algorithms}
+    \begin{itemize}
+        \item Enumeration algorithm, finding the optimal hierarchical hubbing solution.
+
+        Recursive, brute-force algorithm, enumerating all possible mappings $h\colon V_T \to V_G$ (with $h(i) = i$ for all terminals $i \in W$).
+        Used to check the dynamic programming algorithm, but is too slow to use for reasonably-sized instances.
+
+        \item Dynamic programming algorithm, finding the optimal hierarchical hubbing solution.
+
+        Based on ``Approximability of Robust Network Design'' by Olver and Shepherd, from the proof of Lemma~3.1.
+        The dynamic program only finds the optimal solution \emph{value}, and we construct the actual solution (the mapping $h$, and routing template $\set{P_{ij}}$, and bought capacities $u$) from backtracking the DP table.
+        In general, the obtained routing template paths may be non-simple, which we `fix' by removing the cycles explicitly.
+
+        \item Semi-infinite MIP formulation, finding an exact solution.
+
+        MIP formulation using row generation.
+        Turns out to be slow, as many row generation iterations are needed to find an optimal solution.
+
+        \item Compact MIP formulation, finding an exact solution.
+
+        MIP formulation where the need for row generation is removed by using a clever dualization trick, as described in ``Provisioning Virtual Private Networks under Traffic Uncertainty'' by Alt\i{}n, Amaldi, Belotti and P\i{}nar.
+
+        Using the solution from the DP algorithm, we have attempted to warm start the MIP by providing this solution to the solver.
+        However, it seems to be the case this solution is sometimes not used by the solver, but sometimes it speeds up the solving process.
+        We have not been able to find (yet) why the solver is not able to do something with the provided solution.
+
+        Both MIP formulations are implemented using Gurobi.
+    \end{itemize}
+
+    \section{Experiments}
+    \begin{itemize}
+        \item Petersen graph
+        \begin{itemize}
+            \item All ($68\,185$) instances with:
+            \begin{itemize}
+                \item Unit cost on the edges in $G$,
+                \item All possible choices for which nodes in $G$ are a terminal ($\sim 2^{10}$),
+                \item All possible \emph{two-union star} trees as the demand tree, with unit capacity on the edges incident to a terminal, and all (relevant) choices for the bridge cost.
+                \item For all cases, the LP relaxation has the same objective value as the optimal integer solution.
+                In almost all cases, the LP relaxation solution was integral.
+            \end{itemize}
+            \item ($> 100\,000$) random instances, with:
+            \begin{itemize}
+                \item Random cost on the edges in $G$,
+                \item Random choices for which nodes in $G$ are a terminal,
+                \item Randomly built demand tree.
+                \item Yielded no interesting results
+            \end{itemize}
+        \end{itemize}
+
+        \item Augmented Petersen graph
+        \begin{itemize}
+            \item
+        \end{itemize}
+    \end{itemize}
+
+    \section{Generalizing the proof on ring networks}
+
+\end{document}
