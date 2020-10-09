@@ -19,7 +19,9 @@
     \maketitle
     \hrule
 
+
     \section{Introduction}
+
 
     \section{Implemented algorithms}
     \begin{itemize}
@@ -50,6 +52,7 @@
         Both MIP formulations are implemented using Gurobi.
     \end{itemize}
 
+
     \section{Experiments}
     \begin{itemize}
         \item Petersen graph
@@ -73,9 +76,26 @@
 
         \item Augmented Petersen graph
         \begin{itemize}
-            \item
+            \item Adding fifteen groups of terminals
+            \begin{itemize}
+                \item Consider the Petersen graph where all edges have weight 1.
+                \item Add a root node to the Petersen graph and connect it to all vertices with weight 2.
+                \item Add a center node and a (terminal) root node to the demand tree and connect them with weight 3, 5 or $\infty$.
+                \item For each edge of the original Petersen graph, pick one of the two vertices and consider its two neighbors outside the edge.
+                Add three terminals to the demand tree, connect each terminal to a new interior node (weight 1) and connect this new interior node to the center node (weight 1, 2 or 3).
+                \item For each setting, we run this experiment approximately 100 times.
+                Each iteration took approximately 40 seconds.
+                No interesting results so far, but we just realized that the root node was not a terminal in our test case, so we will rerun these.
+            \end{itemize}
+            \item Adding thirty groups of terminals
+            \begin{itemize}
+                \item A similar setting, but we now add a group for both endpoints of each edge, instead of picking only one endpoint arbitrarily.
+                \item Each test took now approximately two hours, and these also need to run again because the root of the demand tree was not a terminal.
+            \end{itemize}
+
         \end{itemize}
     \end{itemize}
+
 
     \section{Generalizing the proof on ring networks}
 
