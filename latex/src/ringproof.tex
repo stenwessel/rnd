@@ -18,7 +18,7 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
-\title{Extending the ring network proof}
+\title{Generalizing the ring network proof}
 \author{David Dekker \and Sten Wessel}
 \date{\today}
 
@@ -86,29 +86,24 @@
     To goal is to show that there exists an optimal solution to the generalized VPN problem that is a tree solution (or, equivalently, there exists a tree solution to the generalized VPN problem that is optimal).
     Consider an optimal tree solution $(\set{P_{ij}}, u)$ to a generalized VPN instance $(G, c, W, T, b)$, with $|W| = k$ and $T$ a two-union star with the unit capacity assumption as above.
     Let $\mathcal P_i$ be as in \cite{grandoni2008short} for a fixed $i \in W$.
-    In our setting, we have a different expression for the \emph{required} capacity of edge $e$:
+    We define
     \[
-        u(e) = \begin{cases}
-                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i)} & \text{if $m(e, \mathcal P_i) \le b(r)$,} \\
-                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i), b(r)} & \text{otherwise,}
-        \end{cases}
+        \xi(e, \mathcal P_i) \coloneqq \min\set{\alpha(e, \mathcal P_i),\ \beta(e, \mathcal P_i)} + \min\set{n(e, \mathcal P_i) - \alpha(e, \mathcal P_i),\ k - n(e, \mathcal P_i) - \beta(e, \mathcal P_i)}
     \]
     where
     \begin{gather*}
         n(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij}}|,\\
-        m(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij},\ r \in \pi_T(i, j)}|,
+        \alpha(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij},\ r \in \pi_T(i, j)}|,\\
+        \beta(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \not\in P_{ij},\ r \not\in \pi_T(i, j)}|,
     \end{gather*}
-    that is, $m(e, \mathcal P_i)$ is the number of paths in $\mathcal P_i$ containing $e$, \emph{while simultaneously the path in the demand tree between $i$ and $j$ crosses the bridge}.
-    We refer to Figure~1 of \cite{grandoni2008short} for an explanation of the first case.
-    For the latter, notice here that the bridge limits the required capacity and is hence added to the minimum.
-    Besides some examples, we have no good proof why this expression is actually correct.
-
+    that is, $\alpha(e, \mathcal P_i)$ is the number of paths in $\mathcal P_i$ containing $e$, \emph{while simultaneously the path in the demand tree between $i$ and $j$ crosses the bridge}.
+    In our setting, we have a different expression for the \emph{required} capacity of edge $e$:
+    \[
+        u(e) = \xi(e, \mathcal P_i) + \min\Big\{b(r),\ n(e, \mathcal P_i) - \xi(e, \mathcal P_i),\ k - n(e, \mathcal P_i) -  \xi(e, \mathcal P_i)\Big\}.
+    \]
     We can now formulate the generalized Pyramidal Routing (\emph{genPR}) problem with instance $(G, c, W, T, b, i)$ as to minimize $\sum_{e \in E_G} c(e) y(e, \mathcal P_i)$ over all $\mathcal P_i$ (for an arbitrary fixed $i \in W$), where we define
     \[
-        y(e, \mathcal P_i) = \begin{cases}
-                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i)} & \text{if $m(e, \mathcal P_i) \le b(r)$,} \\
-                   \min\set{n(e, \mathcal P_i), k - n(e, \mathcal P_i), b(r)} & \text{otherwise.}
-        \end{cases}
+        y(e, \mathcal P_i) = \xi(e, \mathcal P_i) + \min\Big\{b(r),\ n(e, \mathcal P_i) - \xi(e, \mathcal P_i),\ k - n(e, \mathcal P_i) -  \xi(e, \mathcal P_i)\Big\}.
     \]
 
     We now formulate our version of Conjecture~2 (as in \cite{grandoni2008short}).
@@ -134,35 +129,13 @@
             \end{cases}
         \]
 
-        Before we start with the proof of (our equivalent of) Claim~1, we first show:
-
-        \renewcommand\theclaim{0}
-        \begin{claim}
-            $y(e, \mathcal P_i) \le b(r) \frac{n(e, \mathcal P_i)}{m(e, \mathcal P_i)}$.
-        \end{claim}
-        \begin{proof}
-            We consider the two cases of $y(e, \mathcal P_i)$:
-            \begin{itemize}
-                \item If $m(e, \mathcal P_i) \le b(r)$, then
-                \[
-                    y(e, \mathcal P_i) \le n(e, \mathcal P_i) \le n(e, \mathcal P_i) \frac{b(r)}{m(e, \mathcal P_i)}.
-                \]
-                as $m(e, \mathcal P_i) \le b(r)$ by assumption.
-                \item If $m(e, \mathcal P_i) > b(r)$, then
-                \[
-                    y(e, \mathcal P_i) \le b(r) \le b(r) \frac{n(e, \mathcal P_i)}{m(e, \mathcal P_i)}
-                \]
-                as $n(e, \mathcal P_i) \le m(e, \mathcal P_i)$ holds by definition.\qedhere
-            \end{itemize}
-        \end{proof}
-
         Now, the proof of Claim~1 is slightly different, as our universe is described by a different set of inequalities.
 
         \renewcommand\theclaim{1}
         \begin{claim}
             $D^e \in \mathcal U_T$, that is
             \[
-                \sum_{\substack{ij \in \binom{W}{2},\\f \in \pi_T(i,j)}} d^e_{ij} \le b(f)
+                \sum_{\substack{ij \in \binom{W}{2}:\\f \in \pi_T(i,j)}} d^e_{ij} \le b(f)
             \]
             for all $f \in E_T$.
         \end{claim}
@@ -172,34 +145,34 @@
                 \item $f \neq r$, hence we can write $f = f_i$, where $f_i \in E_T$ is the edge incident some terminal $i \in W$.
                 Now note that we can write
                 \[
-                    \sum_{\substack{\ell j \in \binom{W}{2},\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} = \sum_{j \in W \setminus \set{i}} d^e_{ij}
+                    \sum_{\substack{\ell j \in \binom{W}{2}:\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} = \sum_{j \in W \setminus \set{i}} d^e_{ij}
                 \]
                 as $f_i$ is exactly in all paths from/to $i$ in the tree, as it is the edge incident to $i$.
                 The rest of this case follows the same steps as the proof in \cite{grandoni2008short}:
                 \[
                     \begin{split}
-                        \sum_{\substack{\ell j \in \binom{W}{2},\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} &= \sum_{j \in W \setminus \set{i}} d^e_{ij} \\
-                        &= \frac 1 k \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
-                        &\le \frac 1 k \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} \left( \frac{k - n(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{n(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
-                        &= \frac{1}{n(e, \mathcal P_i)} \sum_{\substack{j \in W \setminus \set{i},\\ e \in P_{ij}}} 1 \\
+                        \sum_{\substack{\ell j \in \binom{W}{2}:\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} &= \sum_{j \in W \setminus \set{i}} d^e_{ij} \\
+                        &= \frac 1 k \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                        &\le \frac 1 k \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} \left( \frac{k - n(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{n(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                        &= \frac{1}{n(e, \mathcal P_i)} \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} 1 \\
                         &= 1 \\
                         &= b(f_i).
                     \end{split}
                 \]
 
                 \item $f = r$.
-                The following looks more daunting than it actually is, but it is quite technical.
-                If anything is unclear, we would be happy to explain in the meeting.
+                We have not been able, with the current definition of $y$ and $D^e$, to make this work.
+                However, we reduced it to a more accessible form.
                 In the third line, we exchange the order of the two sums and use the symmetry of $\pi_T(i, j)$ and $P_{ij}$.
                 \[
                     \begin{split}
-                        \sum_{\substack{ij \in \binom{W}{2},\\r \in \pi_T(i,j)}} d^e_{ij} &= \frac 1 2 \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j)}} d^e_{ij} \\
-                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
-                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{j \in W} \sum_{\substack{i \in W \setminus \set{j},\\r \in \pi_T(j,i),\\e \in P_{ji}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
-                        &= \frac{1}{k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i},\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \\
-                        &= \frac{1}{k} \sum_{i \in W} \left( m(e, \mathcal P_i) \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \right) \\
-                        &\stackrel{\text{Claim 0}}{\le} \frac{1}{k} \sum_{i \in W} b(r) \\
-                        &= b(r).
+                        \sum_{\substack{ij \in \binom{W}{2},\\r \in \pi_T(i,j)}} d^e_{ij} &= \frac 1 2 \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j)}} d^e_{ij} \\
+                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                        &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{j \in W} \sum_{\substack{i \in W \setminus \set{j}:\\r \in \pi_T(j,i),\\e \in P_{ji}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                        &= \frac{1}{k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \\
+                        &= \frac{1}{k} \sum_{\substack{i \in W:\\n(e, \mathcal P_i) > 0}} \left( \alpha(e, \mathcal P_i) \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \right) \\
+                        &\ \vdots\\
+                        &\le b(r).
                     \end{split}
                 \] \qedhere
             \end{itemize}
@@ -212,7 +185,7 @@
 
     Now, what remains to show is that indeed an optimal tree solution exists for the \emph{genPR} problem when $G$ is a ring.
     If we follow the structure of the proof in \cite{grandoni2008short}, not first that Claim~3 also holds for our case.
-    However, Claim~4 does not hold: it might be thay $y(e, \mathcal P_i) = y(f, \mathcal P_i) = b(r)$ (in the second case of the definition of $y$).
+    However, Claim~4 does not hold: it might be that $y(e, \mathcal P_i) = y(f, \mathcal P_i) = b(r)$ (in the second case of the definition of $y$).
     We have not quite yet mastered the inductive proof that follows (in which Claim~4) is used.
     Therefore, we are not sure that the counterexample for Claim~4 is actually problematic, or how to circumvent this issue.
 
