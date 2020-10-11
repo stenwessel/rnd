@@ -21,6 +21,9 @@
 
 
     \section{Introduction}
+    Aim of the project is to gain insights on the \emph{generalized VPN conjecture}, which is a generalization of the VPN problem, where the universe of traffic demand matrices is described by a demand tree (with capacities on the edges).
+    We have so far implemented the algorithm that the conjectures states is optimal, as well as MIP formulations that give an exact solution.
+    We have also looked at generalizing the proof that shows that the VPN conjecture is true on ring networks.
 
 
     \section{Implemented algorithms}
@@ -93,6 +96,13 @@
                 \item Each test took now approximately two hours, and these also need to run again because the root of the demand tree was not a terminal.
             \end{itemize}
 
+        \end{itemize}
+
+        \item Realistic instances, provided by Laura
+        \begin{itemize}
+            \item Demand trees are random, with capacities based on the VPN capacities described in the instance.
+            \item Some instances are very large, taking 2h to solve.
+            No interesting results so far (but not many experiments have been done yet).
         \end{itemize}
     \end{itemize}
 
