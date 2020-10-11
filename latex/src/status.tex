@@ -98,5 +98,17 @@
 
 
     \section{Generalizing the proof on ring networks}
+    If a tree solution is provided, it is possible to define the number of times we need to buy an edge $e$ in the tree.
+    This is denoted with $u(e)$ in the paper ``A Short Proof of the VPN Tree Routing Conjecture on Ring Networks'' by Grandoni, Kaibel, Oriolo and Skutella.
+    We believe we managed to generalize this definition to the situation where the demand tree is a 2-union star.
+    This definition is explained in the slides and in the work-in-progress report ``Generalizing the VPN conjencture''.
+    In the report, an attempt to prove Lemma~3 is described, but it was not successful yet.
+    Under the current definition of the traffic demands $D^e$, we are not yet able to prove that Claim~1 holds on the bridge (i.e., the edge in the demand tree that connects the two stars).
+    So far, other definitions were also not successful.
+    It is not clear whether this approach can work, because we are not sure whether a tree solution will actually always exist.
 
+    For the second part of the theorem, we also do not have a proof yet.
+    We should note that Olver mentions that he was able to finish a part of the proof in his lecture notes ``Designing networks under uncertain demands (draft)''.
+    It is precisely the situation of the generalized VPN network with a 2-union star as demand tree.
+    However, he uses a different structure based on vines.
 \end{document}
