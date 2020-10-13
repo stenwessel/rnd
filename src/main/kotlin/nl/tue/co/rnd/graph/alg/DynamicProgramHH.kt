@@ -49,7 +49,7 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
         val paths = terminalsSequence.asSequence()
                 .map { ij ->
                     val (i, j) = ij
-                    ij to findPathInTree(i, j, demandTree).asSequence()
+                    val nonSimplePath = findPathInTree(i, j, demandTree).asSequence()
                             .windowed(2, partialWindows = true)
                             .flatMap { edges ->
                                 val from: V
@@ -70,12 +70,15 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
 
                                 shortestPath[hz to hw]!!
                             }
-                            .windowed(2, partialWindows = true)
-                            .mapNotNull { if (it.size < 2 || it[0] != it[1]) it[0] else null }
                             .toList()
+
+                    val path = removeCycles(nonSimplePath)
+                    ij to path
                 }.toMap()
 
-        return HubbingResult(minCost, setOf(mapping), paths, capacity.values.toMap())
+        val edgeMapping = demandTree.edges.associateWith { shortestPath[mapping[it.first] to mapping[it.second]]!! }
+
+        return HubbingResult(minCost, setOf(mapping), edgeMapping, paths, capacity.values.toMap())
     }
 
     private fun backtrack(cost: Map<Pair<Subtree<V>, V>, Double>,
@@ -133,6 +136,25 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
         }
 
         return subtrees
+    }
+
+    private fun removeCycles(path: List<V>): List<V> {
+        val seenAt = mutableMapOf<V, Int>()
+        val cycleIndices = mutableSetOf<Int>()
+        for ((i, v) in path.withIndex()) {
+            if (v in seenAt) {
+                val start = seenAt[v]!! + 1
+                cycleIndices.addAll(start..i)
+
+                for (j in start until i) {
+                    seenAt.remove(path[j])
+                }
+            }
+
+            seenAt[v] = i
+        }
+
+        return path.filterIndexed { i, _ -> i !in cycleIndices }
     }
 }
 

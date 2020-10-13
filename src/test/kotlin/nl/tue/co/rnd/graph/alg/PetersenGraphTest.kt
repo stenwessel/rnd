@@ -113,6 +113,8 @@ internal class PetersenGraphTest {
     fun laurasPotentialCounterexample() {
         val random = Random(1988)
 
+        val env = GRBEnv(true)
+        env.start()
         for (i in 1 until 0b100000000000000) {
             val k = random.nextInt(0b100000000000000)
             val choices = k.toString(radix = 2).padStart(15, '0')
@@ -121,15 +123,92 @@ internal class PetersenGraphTest {
 
 //            val enum = EnumerateHH(graph, demandTree, terminals).computeSolution().cost
 //            println(enum)
-            val dp = DynamicProgramHH(graph, demandTree, terminals).computeSolution().cost
-            val mip = CompactMipVpnSolver(graph, demandTree, terminals).computeSolution().cost
+            val dp = DynamicProgramHH(graph, demandTree, terminals, backtrack = true).computeSolution()
+
+            println("Banaan ${dp.cost}")
+
+            val mipSolver = CompactMipVpnSolver(graph, demandTree, terminals, env)
+
+            // Hot start
+            for ((e, u) in mipSolver.problem.u) {
+                u[GRB.DoubleAttr.Start] = dp.boughtCapacity[e]!!
+            }
+
+            for ((_, f) in mipSolver.problem.fMin) {
+                f[GRB.DoubleAttr.Start] = 0.0
+            }
+
+            for ((_, f) in mipSolver.problem.fPlus) {
+                f[GRB.DoubleAttr.Start] = 0.0
+            }
+
+            for ((i, j) in mipSolver.terminalSequence) {
+                val path = dp.routingTemplate[i to j] ?: continue
+                path.asSequence()
+                        .zipWithNext()
+                        .forEach { (u, v) ->
+                            // Find the edge for uv
+                            val e = graph.pairToEdge[u to v]
+                            if (e != null) {
+                                mipSolver.problem.fMin[Triple(e, i, j)]?.set(GRB.DoubleAttr.Start, 1.0)
+                            }
+                            else {
+                                val e = graph.pairToEdge[v to u]
+                                mipSolver.problem.fPlus[Triple(e, i, j)]?.set(GRB.DoubleAttr.Start, 1.0)
+                            }
+                        }
+            }
+
+            for ((index, omega) in mipSolver.problem.omega) {
+                val (uv, e) = index
+                val path = dp.edgeMapping[e]?.zipWithNext() ?: continue
+                omega[GRB.DoubleAttr.Start] = when {
+                    uv.first to uv.second in path || uv.second to uv.first in path -> 1.0
+                    else -> 0.0
+                }
+            }
+
+            mipSolver.problem.model.write("banaan.mps")
+            mipSolver.problem.model.write("banaan.mst")
+
+            val mip = mipSolver.computeSolution().cost
+
+            mipSolver.problem.model.write("banaan.sol")
+            return
 
 
 //            assertEquals(enum, dp, "Enum and DP do not match for choices $choices")
-            assertEquals(dp, round(mip), "MIP does not match for choices $choices")
+            assertEquals(dp.cost, round(mip), "MIP does not match for choices $choices")
 
         }
 //        val terminalGroups = petersonEdges.map
+    }
+
+    @Test
+    fun convertMst() {
+        val file = File("cplex.mst")
+        file.writeText("""<?xml version = "1.0" encoding="UTF-8" standalone="yes"?>
+<CPLEXSolutions version="1.2">
+ <CPLEXSolution version="1.2">
+  <header
+    problemName="banaan.mps"
+    solutionName="m1"
+    solutionIndex="0"
+    MIPStartEffortLevel="0"
+    writeLevel="2"/>
+  <variables>""".trimIndent())
+
+        File("banaan.mst").forEachLine {
+            if (it.startsWith('#')) return@forEachLine
+
+            val (name, value) = it.trim().split(' ')
+
+            file.appendText("<variable name=\"$name\" index=\"0\" value=\"$value\"/>\n")
+        }
+
+        file.appendText("""</variables>
+ </CPLEXSolution>
+</CPLEXSolutions>""")
     }
 
     @Test
