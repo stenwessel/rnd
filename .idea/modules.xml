@@ -3,9 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/latex/latex.iml" filepath="$PROJECT_DIR$/latex/latex.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rnd.iml" filepath="$PROJECT_DIR$/.idea/modules/rnd.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rnd.main.iml" filepath="$PROJECT_DIR$/.idea/modules/rnd.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rnd.test.iml" filepath="$PROJECT_DIR$/.idea/modules/rnd.test.iml" />
     </modules>
   </component>
 </project>

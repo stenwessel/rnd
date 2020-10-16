@@ -16,7 +16,7 @@ class EnumerateHH<V>(override val graph: WeightedGraph<V>, override val demandTr
 
     private fun recursiveAssign(treeInternals: Set<V>, mapping: MutableMap<V, V>, distanceInGraph: Map<Pair<V, V>, Double>): HubbingResult<V> {
         if (treeInternals.isEmpty()) {
-            return HubbingResult(hubbingCost(demandTree, distanceInGraph, mapping), emptySet())
+            return HubbingResult(hubbingCost(demandTree, distanceInGraph, mapping), setOf(mapping))
         }
 
         val i = treeInternals.first()
@@ -24,15 +24,16 @@ class EnumerateHH<V>(override val graph: WeightedGraph<V>, override val demandTr
         var bestCost = Double.POSITIVE_INFINITY
         val bestMappings = mutableSetOf<Map<V, V>>()
         for (j in graph.vertices) {
-            mapping[i] = j
-            val (cost, _) = recursiveAssign(treeInternals - i, mapping, distanceInGraph)
+            val newMapping = mapping.toMutableMap()
+            newMapping[i] = j
+            val (cost, mappings) = recursiveAssign(treeInternals - i, newMapping, distanceInGraph)
             if (cost <= bestCost) {
                 if (cost < bestCost) {
                     bestMappings.clear()
                 }
 
                 bestCost = cost
-                bestMappings.add(mapping.toMap())
+                bestMappings.addAll(mappings)
             }
         }
 
