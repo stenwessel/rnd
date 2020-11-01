@@ -1,0 +1,88 @@
+%! Author = Sten
+%! Date = 01-11-2020
+
+% Preamble
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% Packages
+\usepackage[fleqn]{amsmath}
+\usepackage{amsfonts}
+
+% Document
+\begin{document}
+
+    Let $G = (V, E)$ be a graph with with edge costs $c\colon E \to \mathbb R_+$, describing a network.
+    Let $W \subseteq V$ be a set of terminals.
+    Let $\mathcal U$ describe the universe of symmetric demand matrices $(D_{ij})_{i,j \in W}$ (we require that $D_{ii} = 0$ for all $i \in W$), describing the amount of traffic between two terminals.
+
+    We consider a specific universe of demands, called the \emph{capped hose model}.
+    We can describe the capped hose model is described by a polytope: each terminal $i$ has maximum capacity $b_i$ (as in the hose model), and additionally there is an upper bound $d_{ij}$ on the demand between terminals $i,j \in W$.
+    Hence, we can describe the capped hose polytope $\mathcal H^{cap}(b, d)$ as all (symmetric) matrices $(D_{ij})_{i,j \in W}$ for which
+    \[
+        \begin{split}
+            \sum_{j \in W} D_{ij} &\le b_i \qquad&&\forall_{i \in W}, \\
+            D_{ij} &\le d_{ij} \qquad&&\forall_{i,j \in \binom W 2}.
+        \end{split}
+    \]
+    Note that setting $d_{ij} = 0$ signals that terminals $i$ and $j$ may not communicate.
+
+    We define a graph $H$ with vertex set the terminals $W$ and edges $W \times W$, weighted with $d_{ij}$.
+    In the remainder, we focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
+
+    \section{MIP formulation}
+    As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
+    We then use a dualization trick to obtain a compact formulation.
+
+    Let $x_{uv}$ denote the amount of capacity we buy of edge $\{u,v\}$ in the network graph $G$.
+    The semi-infinite MIP formulation (the master problem) becomes
+    \begin{alignat*}{5}
+        \text{minimize}\ && \sum_{uv \in E} c_{uv} \cdot x_{uv} &&& \\
+        \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E,\ D \in \mathcal U^*} \\
+        && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+                                     1 & \text{if $u = i$} \\
+                                     -1 & \text{if $u = j$} \\
+                                     0 & \text{otherwise}
+        \end{cases} &&\qquad \forall_{u \in V,\ ij \in \binom{W}{2}} \\
+        && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E} \\
+        && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
+    \end{alignat*}
+    where $\mathcal U^* \subseteq \mathcal H^\text{cap}(b, d)$, and is populated by solving the following row generation subproblems (for all $uv \in E$).
+    Let $(\tilde x, \tilde f)$ denote the current optimal solution of the master problem.
+    \begin{alignat*}{5}
+        \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
+        \text{subject to}\quad && D_{ij} &\le d_{ij} &&\qquad \forall_{ij \in \binom W 2} \\
+        && \sum_{\substack{j \in W:\\i \neq j}} D_{ij} &\le b_i &&\qquad \forall_{i \in W} \\
+        && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
+    \end{alignat*}
+    Let $D^*$ denote the optimal solution of the above row generation subproblem.
+    If the objective of $D^*$ violates the constraint in the master problem (when its greater than $\tilde x_{uv}$), then we add $D^*$ to $\mathcal U^*$.
+
+    \subsection{Compact formulation}
+    To obtain the compact formulation, we dualize the subproblems.
+    Fix an edge $uv \in E$.
+    We introduce dual variables: $\psi_{ij}^{uv}$, for all $ij \in \binom W 2$, for the first constraint, and $\omega_i^{uv}$ for all $i \in \binom W 2$, for the second constraint.
+    We then get the dual
+    \begin{alignat*}{5}
+        \text{minimize}\quad && \sum_{ij \in \binom{W}{2}} d_{ij} \cdot \psi_{ij}^{uv} + \sum_{i \in W} b_i \cdot \omega_i^{uv} &&& \\
+        \text{subject to}\quad && \psi_{ij}^{uv} + \omega_i^{uv} + \omega_j^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{ij \in \binom W 2} \\
+        && \psi_{ij}^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}} \\
+        && \omega_i^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{i \in W}
+    \end{alignat*}
+    Because of strong duality and because $x_{uv}$ appears with nonnegative coefficients in the objective, we can substitute the dual into the master problem to obtain a compact formulation:
+    \begin{alignat*}{5}
+        \text{minimize}\ && \sum_{uv \in E} c_{uv} \cdot x_{uv} &&& \\
+        \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} d_{ij} \cdot \psi_{ij}^{uv} + \sum_{i \in W} b_i \cdot \omega_i^{uv} &&\qquad \forall_{uv \in E} \\
+        && \psi_{ij}^{uv} + \omega_i^{uv} + \omega_j^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E,\ ij \in \binom W 2} \\
+        && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+                                     1 & \text{if $u = i$} \\
+                                     -1 & \text{if $u = j$} \\
+                                     0 & \text{otherwise}
+        \end{cases} &&\qquad \forall_{u \in V,\ ij \in \binom{W}{2}} \\
+        && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E} \\
+        && \psi_{ij}^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}} \\
+        && \omega_i^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E,\ i \in W} \\
+        && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
+    \end{alignat*}
+\end{document}
