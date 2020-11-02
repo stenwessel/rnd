@@ -85,4 +85,47 @@
         && \omega_i^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E,\ i \in W} \\
         && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
     \end{alignat*}
+
+    \section{Dynamic programming formulation}
+    In Bosman's and Olver's paper ``Exploring the Tractability of the Capped Hose Model'', a dynamic program is suggested for these cirucmstances.
+    They proved that it is optimal for unit capacities for the edges and vertices in the cycle $H$.
+    We will implement this for arbitrary capacities and compare the outcome with the integer program.
+
+    In the first step, the cycle $H$ is modified by adding an extra vertex between each terminal and the cycle.
+    The resulting graph is denoted with $\hat H$ and the new vertex adjacent to terminal $v$ in $\hat H$ is denoted with $\hat v$.
+    We restrict ourselves to the situation where the capacities are minimal, i.e. cannot be reduced while keeping the problem the same.
+    Thus, the capacity of an edge cannot be more than the capacity of an adjacent vertex.
+    And the capacity of a vertex cannot be more than the sum of the capacities of the two adjacent edges.
+
+    Let the vertices on cycle $H$ be $v_0, v_1, \dots, v_n = v_0$.
+    Then the subproblem is defined in the following way: let $C[i, j, h(i), h(j)]$ be the minimum cost of only the part from $i$ to $j$ in $H$ (clockwise), where $\hat v_i$ is mapped to $h(i)$ and $\hat v_j$ is mapped to $h(j)$.
+    Here, $0 \le i < j \le n$ and all terminals must be mapped to itself.
+
+    If $j = i + 1$, then the cost is $b_i \cdot d_c(v_i, h(i)) + d_{ij} \cdot d_c(h(i), h(j)) + b_j \cdot d_c(v_j, h(j))$.
+    Here, $d_c(u, v)$ is the shortest path under cost function $c$ from $u$ to $v$ in $G$, i.e.\ buying each edge on the shortest path once.
+    It is considers the edge $\{\hat v_i, \hat v_j\}$ in the cycle in $\hat H$ and the two edges between these nodes and the corresponding terminals.
+    Because we required the capacities to be minimal, we know that there exist valid demands that utilize the full capacity.
+    Thus, we must buy these.
+
+    If $j$ is not $i+1$, we pick a node $\hat v_k$ with $i < k < j$ (for example, $k = i + 1$).
+    Then, $C[i, j, h(i), h(j)]$ is the minimum over all possible mappings $h(k) \in V_G$ of $C[i, k, h(i), h(k)] + C[k, j, h(k), h(j)] - b_k d(v_k, h(k))$.
+    Both parts consider the edge $(v_k, \hat v_k)$, so we should remove it once to obtain the correct answer.
+
+    This leads to the following recurrence:
+    \[
+        C[i, j, h(i), h(j)] = \begin{cases}
+                                  0 &\text{if $i \ge j$} \\
+                                  b_i \cdot d_c(v_i, h(i)) + d_{ij} \cdot d_c(h(i), h(j)) + b_j \cdot d_c(v_j, h(j)) &\text{if $j = i+1$}\\
+                                  \min_{h(k) \in V_G} C[i, k, h(i), h(k)] + C[k, j, h(k), h(j)] - b_k d(v_k, h(k)) &\text{otherwise}\\
+
+
+        \end{cases}
+    \]
+
+    We can now determine all values by first determining the base cases, then all valid intervals of length two, then length three etc.
+    The last interval will go from $0$ to $n$ and this is the interval we are interested in.
+    The minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)]$ will be the minimum cost.
+    The actual mappings can be obtained by searching the table backwards.
+
+
 \end{document}
