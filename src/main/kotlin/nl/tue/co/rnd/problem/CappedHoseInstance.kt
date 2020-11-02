@@ -15,5 +15,5 @@ data class CappedHoseInstance<V>(override val graph: WeightedGraph<V>,
 
     fun connectionCapacity(ij: UPair<V>) = connectionCapacity[ij] ?: 0.0
 
-    fun connectionCapacity(i: V, j: V) = connectionCapacity[UPair(i, j)] ?: 0.0
+    fun connectionCapacity(i: V, j: V) = connectionCapacity(UPair(i, j))
 }
