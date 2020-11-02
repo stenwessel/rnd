@@ -5,6 +5,7 @@ import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 import nl.tue.co.rnd.graph.alg.GeneralizedVpnSolver.VpnResult
 import nl.tue.co.rnd.graph.findPathInTree
+import nl.tue.co.rnd.util.product
 
 class MipVpnSolver<V>(override val graph: WeightedGraph<V>, override val demandTree: WeightedGraph<V>,
                       override val terminals: Set<V>) : GeneralizedVpnSolver<V> {

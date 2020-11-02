@@ -1,5 +1,6 @@
 package nl.tue.co.rnd.test.instances
 
+import gurobi.GRB
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 import nl.tue.co.rnd.graph.alg.CompactMipVpnSolver
@@ -39,6 +40,16 @@ internal class RingProofCounterexample {
         val enumerate = EnumerateHH(ring, tree, terminals).computeSolution()
         val dp = DynamicProgramHH(ring, tree, terminals, backtrack = true).computeSolution()
         println(dp.cost)
+
+        val compactMipVpnSolver = CompactMipVpnSolver(ring, tree, terminals)
+        val mip = compactMipVpnSolver.computeSolution()
+
+        val fMin = compactMipVpnSolver.problem.fMin
+        val fPlus = compactMipVpnSolver.problem.fPlus
+        for ((i, j) in compactMipVpnSolver.terminalSequence) {
+            val edges = ring.edges.filter { fMin[Triple(it, i, j)]?.get(GRB.DoubleAttr.X) == 1.0 || fPlus[Triple(it, i, j)]?.get(GRB.DoubleAttr.X) == 1.0 }
+            println("$i : $j -> ${edges.joinToString()}")
+        }
 
         for (mapping in enumerate.mappings) {
             println("${enumerate.cost}: ${mapping[rMin]}, ${mapping[rPlus]}")

@@ -2,6 +2,7 @@ package nl.tue.co.rnd.graph.alg
 
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
+import nl.tue.co.rnd.util.product
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

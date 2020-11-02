@@ -1,6 +1,7 @@
 package nl.tue.co.rnd.graph.alg
 
 import nl.tue.co.rnd.graph.WeightedGraph
+import nl.tue.co.rnd.util.product
 
 typealias Path<V> = List<V>
 
@@ -59,26 +60,3 @@ class FloydWarshall<V>(val graph: WeightedGraph<V>) {
         return path
     }
 }
-
-fun <T, U> Iterable<T>.product(other: Iterable<U>): Sequence<Pair<T, U>> {
-    return sequence {
-        for (u in this@product) {
-            for (v in other) {
-                yield(u to v)
-            }
-        }
-    }
-}
-
-fun <T, U, V> Iterable<T>.product(other1: Iterable<U>, other2: Iterable<V>): Sequence<Triple<T, U, V>> {
-    return sequence {
-        for (u in this@product) {
-            for (v in other1) {
-                for (w in other2) {
-                    yield(Triple(u, v, w))
-                }
-            }
-        }
-    }
-}
-
