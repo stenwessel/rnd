@@ -19,7 +19,7 @@
 
     We consider a specific universe of demands, called the \emph{capped hose model}.
     We can describe the capped hose model is described by a polytope: each terminal $i$ has maximum capacity $b_i$ (as in the hose model), and additionally there is an upper bound $d_{ij}$ on the demand between terminals $i,j \in W$.
-    Hence, we can describe the capped hose polytope $\mathcal H^{cap}(b, d)$ as all (symmetric) matrices $(D_{ij})_{i,j \in W}$ for which
+    Hence, we can describe the capped hose polytope $\mathcal H^\text{cap}(b, d)$ as all (symmetric) matrices $(D_{ij})_{i,j \in W}$ for which
     \[
         \begin{split}
             \sum_{j \in W} D_{ij} &\le b_i \qquad&&\forall_{i \in W}, \\
@@ -29,7 +29,9 @@
     Note that setting $d_{ij} = 0$ signals that terminals $i$ and $j$ may not communicate.
 
     We define a graph $H$ with vertex set the terminals $W$ and edges $W \times W$, weighted with $d_{ij}$.
-    In the remainder, we focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
+    We will first derive a compact MIP formulation for general RND problems under the capped hose demand model.
+    We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
+    In this case, a dynamic programming algorithm is suggested by Bosman and Olver, for which it remains open whether it is optimal (for arbitrary $b$ and $d$).
 
     \section{MIP formulation}
     As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
@@ -86,8 +88,11 @@
         && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
     \end{alignat*}
 
+    For the specific case where the support of $(d_{ij})$ is a cycle a dynamic programming algorithm is suggested (but it remains open whether it is optimal for arbitrary $b$ and $d$).
+    We discuss this algorithm next.
+
     \section{Dynamic programming formulation}
-    In Bosman's and Olver's paper ``Exploring the Tractability of the Capped Hose Model'', a dynamic program is suggested for these cirucmstances.
+    In Bosman's and Olver's paper ``Exploring the Tractability of the Capped Hose Model'', a dynamic program is suggested for these circumstances.
     They proved that it is optimal for unit capacities for the edges and vertices in the cycle $H$.
     We will implement this for arbitrary capacities and compare the outcome with the integer program.
 
@@ -116,7 +121,7 @@
         C[i, j, h(i), h(j)] = \begin{cases}
                                   0 &\text{if $i \ge j$} \\
                                   b_i \cdot d_c(v_i, h(i)) + d_{ij} \cdot d_c(h(i), h(j)) + b_j \cdot d_c(v_j, h(j)) &\text{if $j = i+1$}\\
-                                  \min_{h(k) \in V_G} C[i, k, h(i), h(k)] + C[k, j, h(k), h(j)] - b_k d(v_k, h(k)) &\text{otherwise}\\
+                                  \displaystyle \min_{h(k) \in V_G} \{ C[i, k, h(i), h(k)] + C[k, j, h(k), h(j)] - b_k d(v_k, h(k)) \} &\text{otherwise}\\
 
 
         \end{cases}
