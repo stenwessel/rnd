@@ -9,9 +9,15 @@
 % Packages
 \usepackage[fleqn]{amsmath}
 \usepackage{amsfonts}
+\usepackage{graphicx}
+
+\title{Capped hose model: MIP and DP}
+\author{David Dekker \and Sten Wessel}
+\date{\today}
 
 % Document
 \begin{document}
+    \maketitle
 
     Let $G = (V, E)$ be a graph with with edge costs $c\colon E \to \mathbb R_+$, describing a network.
     Let $W \subseteq V$ be a set of terminals.
@@ -97,10 +103,16 @@
     We will implement this for arbitrary capacities and compare the outcome with the integer program.
 
     In the first step, the cycle $H$ is modified by adding an extra vertex between each terminal and the cycle.
-    The resulting graph is denoted with $\hat H$ and the new vertex adjacent to terminal $v$ in $\hat H$ is denoted with $\hat v$.
+    The resulting graph is denoted with $\hat H$ and the new vertex adjacent to terminal $v$ in $\hat H$ is denoted with $\hat v$ (see Figure~\ref{fig:hdak}).
     We restrict ourselves to the situation where the capacities are minimal, i.e. cannot be reduced while keeping the problem the same.
     Thus, the capacity of an edge cannot be more than the capacity of an adjacent vertex.
     And the capacity of a vertex cannot be more than the sum of the capacities of the two adjacent edges.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=.35\textwidth]{hdak.png}
+        \caption{The graph $\hat H$.} \label{fig:hdak}
+    \end{figure}
 
     Let the vertices on cycle $H$ be $v_0, v_1, \dots, v_n = v_0$.
     Then the subproblem is defined in the following way: let $C[i, j, h(i), h(j)]$ be the minimum cost of only the part from $i$ to $j$ in $H$ (clockwise), where $\hat v_i$ is mapped to $h(i)$ and $\hat v_j$ is mapped to $h(j)$.
@@ -115,6 +127,13 @@
     If $j$ is not $i+1$, we pick a node $\hat v_k$ with $i < k < j$ (for example, $k = i + 1$).
     Then, $C[i, j, h(i), h(j)]$ is the minimum over all possible mappings $h(k) \in V_G$ of $C[i, k, h(i), h(k)] + C[k, j, h(k), h(j)] - b_k d(v_k, h(k))$.
     Both parts consider the edge $(v_k, \hat v_k)$, so we should remove it once to obtain the correct answer.
+    See also Figure~\ref{fig:dp} for a sketch of the situation.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=.35\textwidth]{dp.png}
+        \caption{Sketch of the situation for the dynamic program (in $\hat H$).} \label{fig:dp}
+    \end{figure}
 
     This leads to the following recurrence:
     \[
