@@ -27,7 +27,7 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
         }
 
         val rootSubtree = subtrees.last()
-        val (rootMapping, minCost) = graph.vertices.minByWithValue { v -> cost[rootSubtree to v] ?: Double.POSITIVE_INFINITY }!!
+        val (minCost, rootMapping) = graph.vertices.minByWithValue { v -> cost[rootSubtree to v] ?: Double.POSITIVE_INFINITY }!!
 
         if (!backtrack) return HubbingResult(minCost, emptySet())
 
@@ -159,8 +159,8 @@ class DynamicProgramHH<V>(override val graph: WeightedGraph<V>, override val dem
 }
 
 
-fun <T, R : Comparable<R>> Iterable<T>.minByWithValue(selector: (T) -> R): Pair<T, R>? {
+fun <T, R : Comparable<R>> Iterable<T>.minByWithValue(selector: (T) -> R): Pair<R, T>? {
     return this.asSequence()
-            .map { it to selector(it) }
-            .minByOrNull { (_, s) -> s }
+            .map { selector(it) to it }
+            .minByOrNull { (s, _) -> s }
 }

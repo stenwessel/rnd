@@ -5,7 +5,7 @@ import nl.tue.co.rnd.graph.WeightedGraph
 
 typealias UPair<V> = Edge<V>
 
-data class CappedHoseInstance<V>(override val graph: WeightedGraph<V>,
+open class CappedHoseInstance<V>(override val graph: WeightedGraph<V>,
                                  private val terminalCapacity: Map<V, Double>,
                                  private val connectionCapacity: Map<UPair<V>, Double>) : RndInstance<V> {
 

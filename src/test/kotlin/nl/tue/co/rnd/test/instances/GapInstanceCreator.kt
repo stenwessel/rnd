@@ -3,6 +3,7 @@ package nl.tue.co.rnd.test.instances
 import nl.tue.co.rnd.graph.GenVPNInstance
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
+import nl.tue.co.rnd.problem.CappedHoseCycleInstance
 
 class GapInstanceCreator {
     fun construct(numberOfTerminals: Int): GenVPNInstance<Int> {
@@ -11,7 +12,7 @@ class GapInstanceCreator {
         return GenVPNInstance(graph, tree, (1..numberOfTerminals).toSet())
     }
 
-    private fun constructGraph(numberOfTerminals: Int): WeightedGraph<Int> {
+    fun constructGraph(numberOfTerminals: Int): WeightedGraph<Int> {
         val terminals = (1..numberOfTerminals).asSequence()
         val edges = terminals.map { i -> WeightedEdge(0, -i, 1.0) } + terminals.flatMap { i ->
             terminals.filter { j -> j != i }.map { j -> WeightedEdge(i, -j, 1.0) }

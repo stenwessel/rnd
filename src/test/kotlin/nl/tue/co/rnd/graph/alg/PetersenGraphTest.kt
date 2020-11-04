@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 internal class PetersenGraphTest {
 
     companion object {
-        private fun petersen(sampleWeight: () -> Double = { 1.0 }): WeightedGraph<Int> {
+        fun petersen(sampleWeight: () -> Double = { 1.0 }): WeightedGraph<Int> {
             return WeightedGraph(
                     (1..10).toSet(),
                     setOf(
