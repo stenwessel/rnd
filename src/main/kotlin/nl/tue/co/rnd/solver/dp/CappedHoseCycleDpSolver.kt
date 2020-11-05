@@ -22,18 +22,15 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
                 val k = i + 1
                 val vi = terminals[i]
                 val vj = terminals[j]
-                val vk = terminals[k]
                 val bi = instance.terminalCapacity(vi)
-                val bj = instance.terminalCapacity(vj)
-                val bk = instance.terminalCapacity(vk)
                 val dij = instance.connectionCapacity(vi, vj)
 
                 for (hi in graph.vertices) {
                     for (hj in graph.vertices) {
                         table[Index(i, j, hi, hj)] = when {
-                            intervalLength == 1 -> Entry(bi * distance[vi to hi]!! + dij * distance[hi to hj]!! + bj * distance[hj to vj]!!)
+                            intervalLength == 1 -> Entry(bi * distance[vi to hi]!! + dij * distance[hi to hj]!!)
                             else -> {
-                                val (cost, hk) = graph.vertices.minByWithValue { hk -> table[Index(i, k, hi, hk)]!!.cost + table[Index(k, j, hk, hj)]!!.cost - bk * distance[vk to hk]!! }!!
+                                val (cost, hk) = graph.vertices.minByWithValue { hk -> table[Index(i, k, hi, hk)]!!.cost + table[Index(k, j, hk, hj)]!!.cost }!!
                                 Entry(cost, hk)
                             }
                         }
@@ -42,9 +39,7 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
             }
         }
 
-        val v0 = terminals[0]
-        val b0 = instance.terminalCapacity(terminals[0])
-        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[Index(0, terminals.size, h0, h0)]?.cost!! - b0 * distance[v0 to h0]!! }!!
+        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[Index(0, terminals.size, h0, h0)]?.cost!! }!!
 
         return GenericRndSolution(cost)
     }
