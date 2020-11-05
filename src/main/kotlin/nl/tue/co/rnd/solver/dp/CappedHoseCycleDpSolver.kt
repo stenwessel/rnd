@@ -42,7 +42,9 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
             }
         }
 
-        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[Index(0, terminals.size, h0, h0)]?.cost ?: 0.0 }!!
+        val v0 = terminals[0]
+        val b0 = instance.terminalCapacity(terminals[0])
+        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[Index(0, terminals.size, h0, h0)]?.cost!! - b0 * distance[v0 to h0]!! }!!
 
         return GenericRndSolution(cost)
     }
