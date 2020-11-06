@@ -14,7 +14,7 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
 
         val (distance, shortestPath) = FloydWarshall(graph).computeShortestPaths()
 
-        val table: MutableMap<Index<V>, Entry<V>> = mutableMapOf()
+        val table = DpTable<V>()
 
         for (intervalLength in 1..terminals.size) {
             for (i in 0..(terminals.size - intervalLength)) {
@@ -27,10 +27,10 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
 
                 for (hi in graph.vertices) {
                     for (hj in graph.vertices) {
-                        table[Index(i, j, hi, hj)] = when {
+                        table[i, j, hi, hj] = when {
                             intervalLength == 1 -> Entry(bi * distance[vi to hi]!! + dij * distance[hi to hj]!!)
                             else -> {
-                                val (cost, hk) = graph.vertices.minByWithValue { hk -> table[Index(i, k, hi, hk)]!!.cost + table[Index(k, j, hk, hj)]!!.cost }!!
+                                val (cost, hk) = graph.vertices.minByWithValue { hk -> table[i, k, hi, hk].cost + table[k, j, hk, hj].cost }!!
                                 Entry(cost, hk)
                             }
                         }
@@ -39,13 +39,26 @@ class CappedHoseCycleDpSolver<V> : RndSolver<V, CappedHoseCycleInstance<V>, Gene
             }
         }
 
-        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[Index(0, terminals.size, h0, h0)]?.cost!! }!!
+        val (cost, h0) = graph.vertices.minByWithValue { h0 -> table[0, terminals.size, h0, h0].cost }!!
 
         return GenericRndSolution(cost)
     }
 
-    private data class Index<V>(val i: Int, val j: Int, val hi: V, val hj: V)
-    private data class Entry<V>(val cost: Double, val hk: V? = null)
+    private class Entry<V>(val cost: Double, val hk: V? = null)
+
+    private class DpTable<V> {
+        private class Index<V>(val i: Int, val j: Int, val hi: V, val hj: V)
+
+        private val map: MutableMap<Index<V>, Entry<V>> = mutableMapOf()
+
+        operator fun set(i: Int, j: Int, hi: V, hj: V, value: Entry<V>) {
+            map[Index(i, j, hi, hj)] = value
+        }
+
+        operator fun get(i: Int, j: Int, hi: V, hj: V): Entry<V> {
+            return map[Index(i, j, hi, hj)]!!
+        }
+    }
 }
 
 
