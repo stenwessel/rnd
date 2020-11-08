@@ -18,6 +18,9 @@ dependencies {
         implementation(fileTree(gurobiLibDir!!).matching { include("gurobi.jar") })
     }
 
+    implementation("org.graphstream:gs-core:2.0")
+    implementation("org.graphstream:gs-ui-swing:2.0")
+
     testImplementation(kotlin("test-junit5"))
 }
 
