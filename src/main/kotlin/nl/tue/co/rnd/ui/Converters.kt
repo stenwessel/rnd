@@ -2,6 +2,7 @@ package nl.tue.co.rnd.ui
 
 import nl.tue.co.rnd.graph.WeightedGraph
 import org.graphstream.graph.Element
+import org.graphstream.graph.implementations.MultiGraph
 import org.graphstream.graph.implementations.SingleGraph
 
 fun <V> WeightedGraph<V>.toGraphstream(id: String = "graph", terminals: Set<V> = emptySet()) = SingleGraph(id).also {

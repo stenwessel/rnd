@@ -8,8 +8,8 @@ import nl.tue.co.rnd.solver.RndSolver
 import nl.tue.co.rnd.util.pairs
 import nl.tue.co.rnd.util.product
 
-abstract class RndCompactMipSolver<V, P : RndInstance<V>, out S : RndSolution<V, P>>(private val env: GRBEnv = GRBEnv(),
-                                                                                 private val silent: Boolean = false) :
+abstract class RndCompactMipSolver<V, P : RndInstance<V>, out S : RndSolution<V, P>>(private val env: GRBEnv,
+                                                                                     private val silent: Boolean) :
         RndSolver<V, P, S> {
 
     override fun computeSolution(instance: P): S {

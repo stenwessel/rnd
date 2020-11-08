@@ -1,3 +1,5 @@
 package nl.tue.co.rnd.problem
 
-data class GenericRndSolution<V, out P : RndInstance<V>>(val cost: Double) : RndSolution<V, P>
+open class GenericRndSolution<V, out P : RndInstance<V>>(val cost: Double) : RndSolution<V, P> {
+    operator fun component1() = cost
+}

@@ -7,7 +7,11 @@ import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
 import nl.tue.co.rnd.graph.alg.CompactMipVpnSolver
 import nl.tue.co.rnd.instance.GapInstance
+import nl.tue.co.rnd.problem.GenVpnInstance
+import nl.tue.co.rnd.solver.mip.GenVpnMipSolver
+import org.graphstream.graph.implementations.MultiGraph
 import org.graphstream.graph.implementations.SingleGraph
+import org.graphstream.ui.spriteManager.SpriteManager
 import org.graphstream.ui.swing_viewer.SwingViewer
 import org.graphstream.ui.swing_viewer.ViewPanel
 import org.graphstream.ui.view.Viewer
@@ -37,6 +41,7 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
     private lateinit var graph: WeightedGraph<Int>
     private lateinit var displayGraph: SingleGraph
+    private lateinit var sprites: SpriteManager
     private lateinit var tree: WeightedGraph<Int>
 
     private var integerModel: GRBModel? = null
@@ -198,6 +203,7 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         this.graph = GapInstance.constructGraph(k)
         val graph = this.graph.toGraphstream("G", (1..k).toSet())
         this.displayGraph = graph
+        this.sprites = SpriteManager(graph)
 
         this.integerModel = null
         this.fractionalModel = null
@@ -302,8 +308,8 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
     private fun computeSolution() {
         val k = (iK.model as SpinnerNumberModel).number as Int
 
-        val mipSolver = CompactMipVpnSolver(graph, tree, (1..k).toSet(), env)
-        val (_, integerModel) = mipSolver.computeSolution()
+        val mipSolver = GenVpnMipSolver<Int>(env, silent = true)
+        val (_, integerModel) = mipSolver.computeSolution(GenVpnInstance(graph, tree, (1..k).toSet()))
         this.integerModel = integerModel
 
         val lp = integerModel.relax()
@@ -336,7 +342,7 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         resetDisplay()
 
         for ((u, v) in graph.edges) {
-            val x = model.getVarByName("x[{$u,$v}]")[GRB.DoubleAttr.X]
+            val x = model.getVarByName("x[u=$u,v=$v]")[GRB.DoubleAttr.X]
             if (x > EPSILON) {
                 val e = displayGraph.getEdge("{$u,$v}")
                 e["ui.label"] = "%.2f".format(x)
@@ -349,12 +355,31 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         resetDisplay()
 
         for ((u, v) in graph.edges) {
-            val fMin = model.getVarByName("f-[{$u,$v},i=$i,j=$j]")[GRB.DoubleAttr.X]
-            val fPlus = model.getVarByName("f+[{$u,$v},i=$i,j=$j]")[GRB.DoubleAttr.X]
-            if (fMin > EPSILON || fPlus > EPSILON) {
-                val e = displayGraph.getEdge("{$u,$v}")
-                e["ui.label"] = "%.2f / %.2f".format(fMin, fPlus)
-                e["ui.class"] = "highlight"
+            val fuv = model.getVarByName("f[u=$u,v=$v,i=$i,j=$j]")[GRB.DoubleAttr.X]
+            val fvu = model.getVarByName("f[u=$v,v=$u,i=$i,j=$j]")[GRB.DoubleAttr.X]
+
+            if (fuv > EPSILON || fvu > EPSILON) {
+                val s = sprites.addSprite("f[$u,$v]")
+                s.attachToEdge("{$u,$v}")
+                s["ui.class"] = "flo"
+                s.setPosition(1.0)
+
+            }
+
+            if (fuv > EPSILON) {
+                val a = sprites.addSprite("a[$u,$v]")
+                a.attachToEdge("{$u,$v}")
+                a.setPosition(0.5)
+                a["ui.class"] = "arro, too"
+                a["ui.label"] = "%.2f".format(fuv)
+            }
+
+            if (fvu > EPSILON) {
+                val a = sprites.addSprite("a[$v,$u]")
+                a.attachToEdge("{$u,$v}")
+                a.setPosition(0.5)
+                a["ui.class"] = "arro, fro"
+                a["ui.label"] = "%.2f".format(fvu)
             }
         }
     }
@@ -363,6 +388,10 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         for (e in displayGraph.edges()) {
             e.removeAttribute("ui.label")
             e.removeAttribute("ui.class")
+        }
+
+        for (s in sprites.sprites().map { it.id }) {
+            sprites.removeSprite(s)
         }
     }
 
@@ -397,12 +426,44 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                     text-background-mode: plain;
                     text-background-color: white;
                     text-size: 13;
+                    z-index: 0;
+                }
+                
+                sprite {
+                    text-background-mode: plain;
+                    text-background-color: white;
+                    text-size: 13;
                 }
                 
                 edge.highlight {
                     fill-color: red;
                     size: 3px;
                     text-color: red;
+                }
+                
+                sprite.flo {
+                    fill-color: red;
+                    size: 3px;
+                    z-index: 1;
+                    shape: flow;
+                }
+                
+                sprite.arro {
+                    fill-color: red;
+                    size: 15px;
+                    z-index: 1;
+                    shape: arrow;
+                    text-color: red;
+                }
+                
+                sprite.fro {
+                    sprite-orientation: from;
+                    text-alignment: above;
+                }
+                
+                sprite.too {
+                    sprite-orientation: to;
+                    text-alignment: under;
                 }
                 
             """.trimIndent()
