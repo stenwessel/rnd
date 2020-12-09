@@ -1,0 +1,91 @@
+%! Author = Sten
+%! Date = 09-10-2020
+
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+% Packages
+\usepackage[fleqn]{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\input{macros.tex}
+
+\title{\textbf{Generalized VPN project}\\Summary of experiments}
+\author{David Dekker \and Sten Wessel}
+\date{\today}
+
+% Document
+\begin{document}
+    \maketitle
+    \hrule
+
+
+    \section{Generalized VPN}
+    Implemented algorithms:
+    \begin{itemize}
+        \item Enumeration of all hubbing solutions
+        \item Dynamic programming for finding the optimal hubbing solution
+        \item Compact MIP for the optimal solution
+    \end{itemize}
+
+    \noindent%
+    Experiments:
+    \begin{itemize}
+        \item Petersen graph (unit edge cost) with 2-union star demand tree.
+
+        For each possible subset of vertices of Petersen that we mark as terminal:
+        we have tried every possible `partition' of terminals on left/right of the bridge of the demand tree, with all relevant integer choices of the bridge capacity.
+
+        These are $68\,185$ instances in total.
+        No counterexamples.
+        No integrality gap for all instances.
+        Essentially nothing interesting.
+
+        \item
+        Petersen graph with random edge costs, random terminal selection, randomly built demand tree (not restricting to 2-union stars).
+        For more than $100\,000$ instances, no interesting results.
+
+        \item Augmented Petersen graph: Petersen graph with unit edge costs, with additional `root' vertex, connected to all Petersen vertices with edge cost 2.
+
+        Demand tree:
+
+        \includegraphics[width=.2\textwidth]{petdt.png}
+
+        We tried various capacities in the tree (red numbers in the figure).
+        Groups of 3 are defined by, for each edge $uv$, choose an endpoint (say $v$), create the group with $N[v] \setminus \{ u \}$.
+        This will create 15 groups.
+        Choice of endpoint is random.
+        For each combination of capacities in the demand tree, we tried about 200 different sets of groups;
+        none yielded a counterexample.
+
+        We also tried adding two groups for each edge (one for each endpoint), yielding 30 groups total in the demand tree (and---surprisingly---no counterexample).
+
+        \item Realistic VPN instances, with randomly generated demand trees with capacities based on the terminal capacities from the VPN instance (capacities of the `internal' edges of the demand tree are randomly sampled from the normal distribution constructed from the sample mean/sample variance of the terminal capacities in the VPN instance).
+        Most instances are (very) large, and the MIP takes an enormous amount of time and memory to solve these, so we only have a few results, no counterexamples found.
+        However, we don't expect to find any counterexample here.
+
+        \item `Integrality gap' instances from the ACM paper ``The VPN Conjecture is True''.
+        We interpolate the figures there to a class of graphs with $k$ terminals (examples for $k=4$ and $k=6$ below).
+        We assume unit costs on the edges.
+
+        For the regular VPN problem (i.e.\ the demand tree is a star), there is an integrality gap.
+        We try to see whether the integrality gap also exists for a 2-union star demand tree.
+        Note that some choices of 2-union stars are equivalent to a normal star (e.g.\ a sufficiently large bridge capacity, or when there is at most one terminal on a side), so we only look at instances really different from the regular VPN case.
+
+        We do see some 2-union stars where there is no integrality gap (but where the regular VPN equivalent has one).
+        We thought up until yesterday (Wednesday) that we could characterize for which 2-union stars we see this behavior, but it turns out that non-integer capacities of the bridge invalidate this characterization.
+        We hope to give more details tomorrow in the meeting.
+
+    \end{itemize}
+
+    \section{Capped hose model}
+    Implemented algorithms:
+    \begin{itemize}
+        \item Dynamic programming for finding the optimal hubbing solution
+        \item Compact MIP for the optimal solution
+    \end{itemize}
+
+    So far we have no real experiments other than some toy examples to confirm our initial implementation was incorrect (we believe our current version is correct).
+\end{document}

@@ -5,10 +5,11 @@ import gurobi.GRBEnv
 import gurobi.GRBLinExpr
 import nl.tue.co.rnd.problem.CappedHoseInstance
 import nl.tue.co.rnd.problem.GenericRndSolution
+import nl.tue.co.rnd.problem.RndMipSolution
 import nl.tue.co.rnd.util.product
 
 class CappedHoseMipSolver<V>(env: GRBEnv = GRBEnv(), silent: Boolean = false) :
-        RndCompactMipSolver<V, CappedHoseInstance<V>, GenericRndSolution<V, CappedHoseInstance<V>>>(env, silent) {
+        RndCompactMipSolver<V, CappedHoseInstance<V>, RndMipSolution<V, CappedHoseInstance<V>>>(env, silent) {
 
     override fun buildDualDemandPolytope(instance: CappedHoseInstance<V>, terminalPairs: Sequence<Pair<V, V>>,
                                          modelWithVars: Model<V>) {
@@ -54,7 +55,7 @@ class CappedHoseMipSolver<V>(env: GRBEnv = GRBEnv(), silent: Boolean = false) :
         }
     }
 
-    override fun constructSolution(instance: CappedHoseInstance<V>, modelWithVars: Model<V>): GenericRndSolution<V, CappedHoseInstance<V>> {
-        return GenericRndSolution(modelWithVars.model[GRB.DoubleAttr.ObjVal])
+    override fun constructSolution(instance: CappedHoseInstance<V>, modelWithVars: Model<V>): RndMipSolution<V, CappedHoseInstance<V>> {
+        return RndMipSolution(modelWithVars.model[GRB.DoubleAttr.ObjVal], modelWithVars.model)
     }
 }

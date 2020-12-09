@@ -40,7 +40,7 @@ internal class GapInstanceTest {
 
     @Test
     fun originalGapInstance() {
-        val instance = GapInstanceCreator().construct(4)
+        val instance = GapInstanceCreator().construct(3)
 
         val mipSolver = CompactMipVpnSolver(instance.graph, instance.demandTree, instance.terminals)
         val dpSolver = DynamicProgramHH(instance.graph, instance.demandTree, instance.terminals)

@@ -10,6 +10,8 @@
 \usepackage[fleqn]{amsmath}
 \usepackage{amsfonts}
 \usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{xcolor}
 
 \title{Capped hose model: MIP and DP}
 \author{David Dekker \and Sten Wessel}
@@ -151,5 +153,69 @@
     The minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)]$ will be the minimum cost.
     The actual mappings can be obtained by searching the table backwards.
 
+    \section{Generalizing the proof of Bosman and Olver}
+    We first try to generalize the proof that we can restrict to integral solutions (in the MIP formulation above).
+    That is, we can assume $\omega_i(e)$ and $\psi_{ij}(e)$ are integral.
+    Note that here we are slightly adapting the notation from above to match with Bosman and Olver: for an edge $e = \{u, v\}$ we now write $\omega_i(e)$ and $\psi_{ij}(e)$ instead of $\omega_i^{uv}$ and $\psi_{ij}^{uv}$.
+
+    We slightly adapt our view of the problem (B\&O Section~2).
+    Our goal is to specify a routing template $\mathcal P = \{ P_{ij} : \{i, j\} \in E(H) \}$, where $H = (W, E(H))$ is the support graph of $d_{ij}$.
+    Given a routing template, we can write an expression for the minimum capacity we are required to buy for each edge:
+    \[
+        u(e) = \max_{D \in \mathcal H^\text{cap}(b, d)} \sum_{\substack{ij \in \binom W 2 :\\e \in P_{ij}}} D_{ij}.
+    \]
+    The resulting solution has cost $\sum_e c(e) u(e)$, and this we wish to minimize.
+
+    \subsubsection*{Rephrashed version of the problem}
+    We can also formulate the dual version of the above, from which we obtain a convenient rephrased version of the problem.
+    We thus get the following dual expression, as derived above:
+    \[
+        \begin{split}
+            u(e) = \text{min}\quad & \sum_{i \in W} b_i \omega_i(e) + \sum_{ij \in \binom W 2} d_{ij} \psi_{ij}(e) \\
+            \text{s.t.}\quad & \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \qquad \forall_{ij \in E(H) : e \in P_{ij}} \\
+            & \omega_i(e),\ \psi_{ij}(e) \ge 0.
+        \end{split}
+    \]
+    \textcolor{red}{We then rephrase the problem as follows.}
+    Each terminal $i$ buys a capacity vector $\omega_i$, and each connection $ij$ buys a capacity vector $\psi_{ij}$ (indexed by the edges $e \in E$ of $G$), with the property that $\{ e \in E : \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \}$ contains an $i$--$j$-path, for each connection $ij \in E(H)$.
+    The goal is to minimize the total cost
+    \[
+        \sum_{e \in E} c(e) u(e) = \sum_{i} b_i c(\omega_i) + \sum_{ij} d_{ij} c(\psi_{ij}),
+    \]
+    where $c(\omega_i) = \sum_{e \in E} c(e) \omega_i(e)$ and $c(\psi_{ij}) = \sum_{e \in E} c(e) \psi_{ij}(e)$ \textcolor{blue}{(one can verify the total cost expression by substituting the dual objective for $u(e)$, merging the ``min''s, and re-arranging the summations)}.
+
+    \subsubsection*{Integral solutions}
+    We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can restrict to integral capacity vectors $(\boldsymbol \omega, \boldsymbol \psi)$.
+    First, note that in any optimal, possibly fractional, solution, we have that $0 \le \omega_i, \psi_{ij} \le 1$, by the nature of the dual formulation.
+    Hence, if the solution is integral, we know that the capacity vectors are binary.
+    It is convenient to express the solution as a collection of edge sets (which we denote with a capital letter) $\boldsymbol \Omega = (\Omega_i)$ and $\boldsymbol \Psi = (\Psi_{ij})$, where $\Omega_i = \{ e : \omega_i(e) = 1 \}$ and $\Psi_{ij} = \{ e : \psi_{ij}(e) = 1 \}$, i.e.\ the edges that each terminal/connection buys.
+
+    We now assume that $H$ is a cycle, and show that there always exists an integral optimum solution to the capped hose problem.
+    Notice that $u(e)$ is phrased as a fractional $d$-capacitated $b$-matching problem on $H$, which has an integral optimal solution if $H$ is bipartite (since the constraint matrix is the incidence matrix of $H$, which is totally unimodular, see also Schrijver Thm~21.8).
+    Hence, if $H$ is an even cycle, it is bipartite and we are done.
+
+    Now, consider the case when $H$ is an odd cycle.
+    \textcolor{blue}{Since any strict subgraph of a cycle is bipartite, the only case where we do not have an integral optimal solution is when $u(e)$ corresponds to the dual $d$-capacitated $b$-matching problem on the complete cycle.
+    This only happens if the routing path between \emph{every} pair of neighbors uses the edge.}
+
+    So suppose $e = \{u, v\}$ is used on every routing path in a solution $(\boldsymbol \omega, \boldsymbol \psi)$.
+    We claim that the integral solution $(\boldsymbol Y, \boldsymbol Z)$, given by:
+    \begin{itemize}
+        \item taking $Y_i$ to be the set of edges of a shortest $i$--$v$-path (for all terminals $i$),
+        \item taking $Z_{ij} = \varnothing$,
+    \end{itemize}
+    costs no more than $(\boldsymbol \omega, \boldsymbol \psi)$.
+
+    The rest of the proof closely resembles the arguments from B\&O\@.
+    We let $D$ be the traffic matrix with $D_{i,i+1} = \frac 1 2$ for all $i$ (which is possible if we assume integrality of $b$ and $d$).
+    If we now route $D$ according to $(\boldsymbol \omega, \boldsymbol \psi)$, \textcolor{red}{the flow between $i$ and $i+1$ can be split into half a unit of $i$--$v$ flow and half a unit of $v$--$(i+1)$ flow}, since every routing path passes through $e$, and thus through $v$.
+
+    So $D$ induces a unit $i$--$v$ flow for each $i \in W$.
+    So $(\boldsymbol \omega, \boldsymbol \psi)$ has sufficient capacity to route 1 unit of flow from each $i \in W$ simultaneously.
+    This costs at least as much as the sum of the shortest paths from each terminal to $v$ ($\star$).
+    But then we have
+    \[
+        \text{cost of $(\boldsymbol \omega, \boldsymbol \psi)$} = \sum_i b_i c(\omega_i) + \sum_{ij} d_{ij} c(\psi_{ij}) \ge \sum_i b_i c(\omega_i) \overset{(\star)}{\ge} \sum_i b_i c(Y_i) = \text{cost of $(\boldsymbol Y, \boldsymbol Z)$}.
+    \]
 
 \end{document}

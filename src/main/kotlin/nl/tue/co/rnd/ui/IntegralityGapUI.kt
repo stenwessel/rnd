@@ -19,10 +19,13 @@ import org.intellij.lang.annotations.Language
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.EventQueue
+import java.io.File
 import java.lang.IllegalStateException
 import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.swing.*
+import javax.swing.filechooser.FileFilter
+import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -38,6 +41,8 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
     private val gSol: ButtonGroup
     private val iVar: JComboBox<String>
     private val treeContainer: JPanel
+    private val lIntObjVal: JLabel
+    private val lFracObjVal: JLabel
 
     private lateinit var graph: WeightedGraph<Int>
     private lateinit var displayGraph: SingleGraph
@@ -46,6 +51,8 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
     private var integerModel: GRBModel? = null
     private var fractionalModel: GRBModel? = null
+
+    private val fc: JFileChooser
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
@@ -127,6 +134,10 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                 addActionListener { computeSolution() }
             })
 
+            add(JButton("Save screenshot").apply {
+                addActionListener { saveScreenshot() }
+            })
+
             add(JSeparator(SwingConstants.HORIZONTAL))
 
             val displayPanel = JPanel().apply {
@@ -135,6 +146,12 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                     autoCreateContainerGaps = true
                 }
                 setLayout(layout)
+
+                val lIntObj = JLabel("MIP objective:")
+                lIntObjVal = JLabel()
+
+                val lFracObj = JLabel("Relaxed objective:")
+                lFracObjVal = JLabel()
 
                 val lSol = JLabel("Display solution:")
                 val bInt = JRadioButton("Integral").apply {
@@ -161,10 +178,14 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
                 val hGroup = layout.createSequentialGroup().apply {
                     addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                     .addComponent(lIntObj)
+                                     .addComponent(lFracObj)
                                      .addComponent(lSol)
                                      .addComponent(lVar)
                     )
                     addGroup(layout.createParallelGroup()
+                                     .addComponent(lIntObjVal)
+                                     .addComponent(lFracObjVal)
                                      .addComponent(pSol)
                                      .addComponent(iVar)
                     )
@@ -172,6 +193,12 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                 layout.setHorizontalGroup(hGroup)
 
                 val vGroup = layout.createSequentialGroup().apply {
+                    addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                     .addComponent(lIntObj).addComponent(lIntObjVal)
+                    )
+                    addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                     .addComponent(lFracObj).addComponent(lFracObjVal)
+                    )
                     addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                      .addComponent(lSol).addComponent(pSol)
                     )
@@ -191,6 +218,11 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
             resizeWeight = 0.667
         }
         add(splitPane)
+
+        fc = JFileChooser()
+        fc.addChoosableFileFilter(FileNameExtensionFilter("PNG image", "png"))
+        fc.addChoosableFileFilter(FileNameExtensionFilter("JPG image", "jpg"))
+        fc.addChoosableFileFilter(FileNameExtensionFilter("BMP image", "bmp"))
 
         System.setProperty("org.graphstream.ui", "swing")
         loadGraph()
@@ -317,6 +349,9 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
         lp.optimize()
 
+        lIntObjVal.text = integerModel[GRB.DoubleAttr.ObjVal].toString()
+        lFracObjVal.text = lp[GRB.DoubleAttr.ObjVal].toString()
+
         displaySolution()
     }
 
@@ -393,6 +428,14 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         for (s in sprites.sprites().map { it.id }) {
             sprites.removeSprite(s)
         }
+    }
+
+    private fun saveScreenshot() {
+        val result = fc.showSaveDialog(this)
+
+        if (result != JFileChooser.APPROVE_OPTION) return
+
+        this.displayGraph.setAttribute("ui.screenshot", fc.selectedFile.absolutePath)
     }
 
     companion object {
