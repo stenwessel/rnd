@@ -69,31 +69,38 @@ class CappedHoseTest {
     fun gapInstance() {
         val seed = 1984
         val random = Random(seed)
-        val n = 4
+        val n = 5
         val graph = GapInstanceCreator().constructGraph(n)
 
-        val terminals = listOf(1, 3, 4, 2).circular()
-//        val connectionCapacity = List(n) { 1.0 }.circular()
-        val connectionCapacity = List(n) { random.nextInt(1, 11).toDouble() }.circular()
+        val terminals = (1..n).toList().circular()
+        val connectionCapacity = List(n) { 1.0 }.circular()
+//        val connectionCapacity = List(n) { random.nextInt(1, 11).toDouble() }.circular()
         val terminalCapacity = terminals.withIndex().associate { (i, v) ->
             val prev = connectionCapacity[i-1].toInt()
             val next = connectionCapacity[i].toInt()
-//            v to 1.0
-            v to random.nextInt(max(prev, next), prev + next + 1).toDouble()
+            v to 1.0
+//            v to random.nextInt(max(prev, next), prev + next + 1).toDouble()
         }
 
         val instance = CappedHoseCycleInstance(graph, terminals, terminalCapacity, connectionCapacity)
 
         val mipSolver = CappedHoseMipSolver<Int>()
-        val (mip) = mipSolver.computeSolution(instance)
+        val (mip, model) = mipSolver.computeSolution(instance)
 
-        val dpSolver = CappedHoseCycleDpSolver<Int>()
-        val (dp) = dpSolver.computeSolution(instance)
+        val lp = model.relax()
+        lp.optimize()
 
-        val enumSolver = CappedHoseCycleEnumSolver()
-        val (enum) = enumSolver.computeSolution(instance)
+//        val dpSolver = CappedHoseCycleDpSolver<Int>()
+//        val (dp) = dpSolver.computeSolution(instance)
 
-        assertEquals(mip, dp)
+//        val enumSolver = CappedHoseCycleEnumSolver()
+//        val (enum) = enumSolver.computeSolution(instance)
+
+        for (v in lp.vars) {
+            println("${v[GRB.StringAttr.VarName]} = ${v[GRB.DoubleAttr.X]}")
+        }
+
+        assertEquals(mip, lp[GRB.DoubleAttr.ObjVal])
     }
 
 

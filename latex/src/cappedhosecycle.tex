@@ -176,13 +176,13 @@
             & \omega_i(e),\ \psi_{ij}(e) \ge 0.
         \end{split}
     \]
-    \textcolor{red}{We then rephrase the problem as follows.}
+    We then rephrase the problem as follows.
     Each terminal $i$ buys a capacity vector $\omega_i$, and each connection $ij$ buys a capacity vector $\psi_{ij}$ (indexed by the edges $e \in E$ of $G$), with the property that $\{ e \in E : \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \}$ contains an $i$--$j$-path, for each connection $ij \in E(H)$.
     The goal is to minimize the total cost
     \[
         \sum_{e \in E} c(e) u(e) = \sum_{i} b_i c(\omega_i) + \sum_{ij} d_{ij} c(\psi_{ij}),
     \]
-    where $c(\omega_i) = \sum_{e \in E} c(e) \omega_i(e)$ and $c(\psi_{ij}) = \sum_{e \in E} c(e) \psi_{ij}(e)$ \textcolor{blue}{(one can verify the total cost expression by substituting the dual objective for $u(e)$, merging the ``min''s, and re-arranging the summations)}.
+    where $c(\omega_i) = \sum_{e \in E} c(e) \omega_i(e)$ and $c(\psi_{ij}) = \sum_{e \in E} c(e) \psi_{ij}(e)$ (one can verify the total cost expression by substituting the dual objective for $u(e)$, merging the ``min''s, and re-arranging the summations).
 
     \subsubsection*{Integral solutions}
     We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can restrict to integral capacity vectors $(\boldsymbol \omega, \boldsymbol \psi)$.
@@ -195,10 +195,16 @@
     Hence, if $H$ is an even cycle, it is bipartite and we are done.
 
     Now, consider the case when $H$ is an odd cycle.
-    \textcolor{blue}{Since any strict subgraph of a cycle is bipartite, the only case where we do not have an integral optimal solution is when $u(e)$ corresponds to the dual $d$-capacitated $b$-matching problem on the complete cycle.
-    This only happens if the routing path between \emph{every} pair of neighbors uses the edge.}
+    Since any strict subgraph of a cycle is bipartite, the only case where we do not have an integral optimal solution is when $u(e)$ corresponds to the dual $d$-capacitated $b$-matching problem on the complete cycle.
+    This only happens if the routing path between \emph{every} pair of neighbors uses the edge.
 
-    So suppose $e = \{u, v\}$ is used on every routing path in a solution $(\boldsymbol \omega, \boldsymbol \psi)$.
+    So suppose $e = \{u, v\}$ is used on every routing path $P_{ij} \in \mathcal P$.
+    Let $(\boldsymbol \omega, \boldsymbol \psi)$ a (possibly fractional) dual solution, with corresponding primal solution $D$.
+    We first assume that this solution saturates $\boldsymbol b$, i.e.\ the optimal primal solution $D$ satisfies
+    \[
+        \sum_{ij \in EH(H)} D_{ij} = b_i
+    \]
+    for all $i \in W$.
     We claim that the integral solution $(\boldsymbol Y, \boldsymbol Z)$, given by:
     \begin{itemize}
         \item taking $Y_i$ to be the set of edges of a shortest $i$--$v$-path (for all terminals $i$),
@@ -207,15 +213,31 @@
     costs no more than $(\boldsymbol \omega, \boldsymbol \psi)$.
 
     The rest of the proof closely resembles the arguments from B\&O\@.
-    We let $D$ be the traffic matrix with $D_{i,i+1} = \frac 1 2$ for all $i$ (which is possible if we assume integrality of $b$ and $d$).
-    If we now route $D$ according to $(\boldsymbol \omega, \boldsymbol \psi)$, \textcolor{red}{the flow between $i$ and $i+1$ can be split into half a unit of $i$--$v$ flow and half a unit of $v$--$(i+1)$ flow}, since every routing path passes through $e$, and thus through $v$.
+    We let $D$ be the traffic matrix from the primal solution.
+    If we now route $D$ according to $(\boldsymbol \omega, \boldsymbol \psi)$, the flow between $i$ and $i+1$ can be split into flow between $i$--$v$ and flow between $v$--$(i+1)$, since every routing path passes through $e$, and thus through $v$.
 
-    So $D$ induces a unit $i$--$v$ flow for each $i \in W$.
-    So $(\boldsymbol \omega, \boldsymbol \psi)$ has sufficient capacity to route 1 unit of flow from each $i \in W$ simultaneously.
-    This costs at least as much as the sum of the shortest paths from each terminal to $v$ ($\star$).
-    But then we have
+    So $D$ induces a $i$--$v$ flow for each $i \in W$ of at least $b_i$, following directly from the fact that $\boldsymbol b$ is saturated.
+    So $(\boldsymbol \omega, \boldsymbol \psi)$ has sufficient capacity to route $b_i$ unit of flow from each $i \in W$ simultaneously.
+    This costs at least as much as buying $b_i$ of every edge on a shortest path from terminal $i$ to $v$, for all terminals.
+    The latter is exactly the cost of the integral solution $(\boldsymbol Y, \boldsymbol Z)$, proving the claim.
+
+    We are left with the case where $\boldsymbol b$ is not saturated.
+    We show that this is equivalent with a fractional capacitated $b$-matching problem on a path, which is bipartite and therefore shows that the solution is integral.
+
+    As $\boldsymbol b$ is not saturated, there exists a terminal $i \in W$ such that
     \[
-        \text{cost of $(\boldsymbol \omega, \boldsymbol \psi)$} = \sum_i b_i c(\omega_i) + \sum_{ij} d_{ij} c(\psi_{ij}) \ge \sum_i b_i c(\omega_i) \overset{(\star)}{\ge} \sum_i b_i c(Y_i) = \text{cost of $(\boldsymbol Y, \boldsymbol Z)$}.
+        \sum_{ij \in E(H)} D_{ij} < b_i.
     \]
+    By complementary slackness, we must have $\omega_i(e) = 0$.
+    Construct now a new (fractional) $d'$-capacitated $b'$-matching problem on the graph $H'$ obtained from $H$ after `splitting' vertex $i$.
+    Thus, $H$ has vertex set $W\setminus \{i\} \cup \{i', i''\}$ and edge set $E(H') = E(H) \setminus \{ \{i-1,i\}, \{i, i+1\} \} \cup \{ \{i-1, i'\}, \{i'', i+1\} \}$.
+    Set the connection capacities $d'_{i-1,i'} = d_{i-1,i}$, $d'_{i'',i+1} = d_{i,i+1}$ and $d'_{u,v} = d_{u,v}$ for pairs $uv$ not involving $i$, $i'$ or $i''$.
+    Set the terminal capacities $b'_{i'} = b'_{i''} = \infty$ and $b'_j = b_j$ otherwise.
 
+    Note that the $(\boldsymbol \omega, \boldsymbol \psi)$ corresponds to a feasible dual solution $(\boldsymbol \omega', \boldsymbol \psi')$ in the constructed problem for $H'$, by setting $\omega'_{i'} = \omega'_{i''} = 0$.
+    Note that the cost for both solutions are equal.
+    We now argue that the constructed solution is optimal.
+    We first observe that any optimal solution must have $\omega'_{i'} = \omega'_{i''} = 0$, as otherwise the objective becomes $\infty$.
+    If there would exist a different solution with strictly smaller objective, this would correspond to a solution in the original problem with the same (strictly smaller) objective, contradicting optimality of $(\boldsymbol \omega, \boldsymbol \psi)$.
+    Hence, $(\boldsymbol \omega', \boldsymbol \psi')$ is integral as $H'$ is bipartite, and hence $(\boldsymbol \omega, \boldsymbol \psi)$ is integral as well.
 \end{document}
