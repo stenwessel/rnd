@@ -69,7 +69,7 @@ class CappedHoseTest {
     fun gapInstance() {
         val seed = 1984
         val random = Random(seed)
-        val n = 5
+        val n = 4
         val graph = GapInstanceCreator().constructGraph(n)
 
         val terminals = (1..n).toList().circular()
