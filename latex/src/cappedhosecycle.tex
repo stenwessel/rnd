@@ -234,7 +234,7 @@
             D_{i-1,i} + D_{i,i+1} < b_i.
         \]
         By complementary slackness, we must have $\omega_i(e) = 0$.
-        Construct now a new (fractional) $d'$-capacitated $b'$-matching problem on the graph $H'$ obtained from $H$ after `splitting' vertex $i$ (see Figure~\ref{fig:split}, which is much clearer than the formal difition in the next sentence).
+        Construct now a new (fractional) $d'$-capacitated $b'$-matching problem on the graph $H'$ obtained from $H$ after `splitting' vertex $i$ (see Figure~\ref{fig:split}, which is much clearer than the formal definition in the next sentence).
         Thus, $H$ has vertex set $W\setminus \{i\} \cup \{i', i''\}$ and edge set $E(H') = E(H) \setminus \{ \{i-1,i\}, \{i, i+1\} \} \cup \{ \{i-1, i'\}, \{i'', i+1\} \}$.
         Set the connection capacities $d'_{i-1,i'} = d_{i-1,i}$, $d'_{i'',i+1} = d_{i,i+1}$ and $d'_{u,v} = d_{u,v}$ for pairs $uv$ not involving $i$, $i'$ or $i''$.
         Set the terminal capacities $b'_{i'} = b'_{i''} = \infty$ and $b'_j = b_j$ otherwise.
