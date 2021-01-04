@@ -21,7 +21,7 @@ internal class RealisticTest {
         val generator = RandomDemandTreeGenerator()
         val env = GRBEnv(true)
 
-        val file = File("RealisticTestHotStart.csv")
+        val file = File("RealisticTestHotStart-Stress.csv")
         file.appendText("agree,seed,instance,nodecount,itercount,timeDp,timeMip,dp,mip\n")
 
         var count = 0

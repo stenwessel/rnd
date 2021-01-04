@@ -168,12 +168,12 @@ internal class PetersenGraphTest {
                 }
             }
 
-            mipSolver.problem.model.write("banaan.mps")
-            mipSolver.problem.model.write("banaan.mst")
+//            mipSolver.problem.model.write("banaan.mps")
+//            mipSolver.problem.model.write("banaan.mst")
 
             val mip = mipSolver.computeSolution().cost
 
-            mipSolver.problem.model.write("banaan.sol")
+//            mipSolver.problem.model.write("banaan.sol")
             return
 
 
