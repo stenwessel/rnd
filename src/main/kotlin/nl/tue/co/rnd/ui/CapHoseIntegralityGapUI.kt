@@ -5,11 +5,13 @@ import gurobi.GRBEnv
 import gurobi.GRBModel
 import nl.tue.co.rnd.graph.WeightedEdge
 import nl.tue.co.rnd.graph.WeightedGraph
-import nl.tue.co.rnd.graph.alg.CompactMipVpnSolver
 import nl.tue.co.rnd.instance.GapInstance
+import nl.tue.co.rnd.problem.CappedHoseCycleInstance
 import nl.tue.co.rnd.problem.GenVpnInstance
+import nl.tue.co.rnd.solver.mip.CappedHoseMipSolver
 import nl.tue.co.rnd.solver.mip.GenVpnMipSolver
-import org.graphstream.graph.implementations.MultiGraph
+import nl.tue.co.rnd.util.circular
+import nl.tue.co.rnd.util.permutations
 import org.graphstream.graph.implementations.SingleGraph
 import org.graphstream.ui.spriteManager.SpriteManager
 import org.graphstream.ui.swing_viewer.SwingViewer
@@ -19,35 +21,35 @@ import org.intellij.lang.annotations.Language
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.EventQueue
-import java.io.File
-import java.lang.IllegalStateException
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.swing.*
-import javax.swing.filechooser.FileFilter
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-class IntegralityGapUI : JFrame("RND Integrality Gap") {
+class CapHoseIntegralityGapUI : JFrame("RND Integrality Gap - Capped Hose") {
 
     private val env = GRBEnv(false)
 
     private val splitPane: JSplitPane
     private val iK: JSpinner
-    private val iPartition: JComboBox<String>
-    private val iBridge: JSpinner
+    private val iOrder: JComboBox<List<Int>>
+    private val iConnectionCapacity: JTextField
+    private val iTerminalCapacity: JTextField
     private val gSol: ButtonGroup
     private val iVar: JComboBox<String>
-    private val treeContainer: JPanel
+    private val cycleContainer: JPanel
     private val lIntObjVal: JLabel
     private val lFracObjVal: JLabel
 
     private lateinit var graph: WeightedGraph<Int>
     private lateinit var displayGraph: SingleGraph
     private lateinit var sprites: SpriteManager
-    private lateinit var tree: WeightedGraph<Int>
+    private lateinit var cycle: WeightedGraph<Int>
 
     private var integerModel: GRBModel? = null
     private var fractionalModel: GRBModel? = null
@@ -69,41 +71,62 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                 }
                 setLayout(layout)
 
+
+                val lPartition = JLabel("Terminal order in cycle:")
+                iOrder = JComboBox<List<Int>>().apply {
+                    addActionListener { loadCyclePreview() }
+                    addFocusListener(object : FocusListener {
+                        override fun focusGained(e: FocusEvent?) {
+
+                        }
+
+                        override fun focusLost(e: FocusEvent?) {
+                            loadCyclePreview()
+                        }
+                    })
+                }
+
+                val lTerminalCapacity = JLabel("Terminal capacities:")
+                iTerminalCapacity = JTextField("1,1,1,1").apply {
+                    addActionListener { loadCyclePreview() }
+                    addFocusListener(object : FocusListener {
+                        override fun focusGained(e: FocusEvent?) {
+
+                        }
+
+                        override fun focusLost(e: FocusEvent?) {
+                            loadCyclePreview()
+                        }
+                    })
+                }
+
+                val lConnectionCapacity = JLabel("Connection capacities (i,i+1):")
+                iConnectionCapacity = JTextField("1,1,1,1").apply {
+                    addActionListener { loadCyclePreview() }
+                }
+
                 val lK = JLabel("k =")
                 iK = JSpinner(SpinnerNumberModel(4, 3, 30, 1)).apply {
                     (editor as JSpinner.DefaultEditor).textField.columns = 4
                     addChangeListener {
+                        iTerminalCapacity.text = List(this.value as Int) { "1" }.joinToString(",")
+                        iConnectionCapacity.text = List(this.value as Int) { "1" }.joinToString(",")
                         loadGraph()
                     }
                 }
-
-                val lPartition = JLabel("Terminal partition:")
-                iPartition = JComboBox<String>().apply {
-                    addActionListener { loadTreePreview() }
-                }
-
-                val lBridge = JLabel("Bridge capacity:")
-                iBridge = JSpinner(SpinnerNumberModel(1.0, 0.0, 100.0, 1.0)).apply {
-                    val numberEditor = JSpinner.NumberEditor(this, "0.0")
-                    val locale = Locale.getDefault()
-                    numberEditor.format.decimalFormatSymbols = DecimalFormatSymbols(locale)
-                    editor = numberEditor
-                    value = 1.0
-
-                    addChangeListener { loadTreePreview() }
-                }
-
 
                 val hGroup = layout.createSequentialGroup().apply {
                     addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                      .addComponent(lK)
                                      .addComponent(lPartition)
-                                     .addComponent(lBridge)
+                                     .addComponent(lTerminalCapacity)
+                                     .addComponent(lConnectionCapacity)
                     )
                     addGroup(layout.createParallelGroup()
                                      .addComponent(iK, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                     .addComponent(iPartition)
-                                     .addComponent(iBridge, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                     .addComponent(iOrder)
+                                     .addComponent(iTerminalCapacity)
+                                     .addComponent(iConnectionCapacity)
                     )
                 }
                 layout.setHorizontalGroup(hGroup)
@@ -113,10 +136,13 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
                                      .addComponent(lK).addComponent(iK)
                     )
                     addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                     .addComponent(lPartition).addComponent(iPartition)
+                                     .addComponent(lPartition).addComponent(iOrder)
                     )
                     addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                     .addComponent(lBridge).addComponent(iBridge)
+                                     .addComponent(lTerminalCapacity).addComponent(iTerminalCapacity)
+                    )
+                    addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                     .addComponent(lConnectionCapacity).addComponent(iConnectionCapacity)
                     )
                 }
                 layout.setVerticalGroup(vGroup)
@@ -125,10 +151,10 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
             add(computePanel)
 
-            treeContainer = JPanel(BorderLayout()).also {
+            cycleContainer = JPanel(BorderLayout()).also {
                 maximumSize = Dimension(Int.MAX_VALUE, 10)
             }
-            add(treeContainer)
+            add(cycleContainer)
 
             add(JButton("Compute solution").apply {
                 addActionListener { computeSolution() }
@@ -226,7 +252,7 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
         System.setProperty("org.graphstream.ui", "swing")
         loadGraph()
-        loadTreePreview()
+        loadCyclePreview()
     }
 
     private fun loadGraph() {
@@ -277,58 +303,44 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         splitPane.leftComponent = view as ViewPanel
 
         // Update sidebar
-        iPartition.removeAllItems()
-        for (i in 1 until (0b1 shl (k-1))) {
-            iPartition.addItem(i.toString(radix = 2).padStart(k, '0'))
+        iOrder.removeAllItems()
+        for (order in (2..k).toList().permutations()) {
+            iOrder.addItem(listOf(1) + order)
         }
 
         iVar.removeAllItems()
         iVar.addItem("x")
-        for (i in 1..k) {
-            for (j in (i+1)..k) {
-                iVar.addItem("f between $i,$j")
-            }
+        for (i in 0 until k-1) {
+            iVar.addItem("f between ${i+1},${(i+1)%k + 1}")
         }
+        iVar.addItem("f between 1,$k")
     }
 
-    private fun loadTreePreview() {
-        treeContainer.removeAll()
-        val partition = iPartition.model.selectedItem as? String ?: return
-        val bridgeCapacity = (iBridge.model as? SpinnerNumberModel)?.number as? Double ?: return
+    private fun loadCyclePreview() {
+        cycleContainer.removeAll()
+        val order = (iOrder.model.selectedItem as? List<Int>)?.circular() ?: return
+        val connectionCapacity = iConnectionCapacity.text.splitToSequence(',').map { it.trim().toDouble() }.toList()
+        val terminalCapacity = iTerminalCapacity.text.splitToSequence(',').map { it.trim().toDouble() }.toList()
 
-        val left = partition.mapIndexedNotNull { i, c -> if (c == '0') i+1 else null }
-        val right = partition.mapIndexedNotNull { i, c -> if (c == '1') i+1 else null }
-
-        val demandTree = WeightedGraph(
-                (-2..partition.length).toSet() - 0,
-                partition.mapIndexed { j, side -> WeightedEdge(j + 1, side.toInt() - ZERO_CHAR - 2, 1.0) }.toSet() + WeightedEdge(-1, -2, bridgeCapacity)
+        val demandCycle = WeightedGraph(
+                order.toSet(),
+                connectionCapacity.mapIndexed { i, d -> WeightedEdge(order[i], order[i+1], d) }.toSet()
         )
 
-        this.tree = demandTree
+        this.cycle = demandCycle
 
-        val graph = demandTree.toGraphstream("T", (1..partition.length).toSet())
+        val graph = demandCycle.toGraphstream("H", (1..order.size).toSet())
 
-        for (n in graph.nodes()) {
-            val v: Int = n["v"] ?: continue
-
-            if (v > 0) n["ui.label"] = n.id
-
-            n["x"] = when {
-                v == -1 -> 0.5
-                v == -2 -> -0.5
-                v > 0 && partition[v-1] == '0' -> 0.7*cos((PI/2 + PI/8) + 6*PI/16/left.size + 6*PI/8*(left.indexOf(v))/left.size) - 0.5
-                else -> 0.7*cos((PI/2 - PI/8) - 6*PI/16/right.size - 6*PI/8*(right.indexOf(v))/right.size) + 0.5
-            }
-
-            n["y"] = when {
-                v < 0 -> 0.0
-                v > 0 && partition[v-1] == '0' -> 0.7*sin((PI/2 + PI/8) + 6*PI/16/left.size + 6*PI/8*(left.indexOf(v))/left.size)
-                else -> 0.7*sin((PI/2 - PI/8) - 6*PI/16/right.size - 6*PI/8*(right.indexOf(v))/right.size)
-            }
+        for ((i, v) in order.withIndex()) {
+            val n = graph.getNode(v.toString())
+            n["ui.label"] = "${n.id}[${terminalCapacity[i]}]"
+            n["x"] = cos(2*PI*(i+1)/order.size)
+            n["y"] = sin(2*PI*(i+1)/order.size)
         }
 
-        val bridge = graph.getEdge("{-1,-2}")
-        bridge["ui.label"] = "$bridgeCapacity"
+        for (e in graph.edges()) {
+            e["ui.label"] = e["weight"]
+        }
 
         graph["ui.antialias"] = true
         graph["ui.quality"] = true
@@ -340,15 +352,19 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
 
         val view = viewer.addDefaultView(false) as ViewPanel
 
-        treeContainer.add(view, BorderLayout.CENTER)
-        treeContainer.updateUI()
+        cycleContainer.add(view, BorderLayout.CENTER)
+        cycleContainer.updateUI()
     }
 
     private fun computeSolution() {
-        val k = (iK.model as SpinnerNumberModel).number as Int
+        val mipSolver = CappedHoseMipSolver<Int>(env, silent = true)
 
-        val mipSolver = GenVpnMipSolver<Int>(env, silent = true)
-        val (_, integerModel) = mipSolver.computeSolution(GenVpnInstance(graph, tree, (1..k).toSet()))
+        val order = (iOrder.model.selectedItem as? List<Int>)?.circular() ?: return
+        val terminalCapacity = order.zip(iTerminalCapacity.text.splitToSequence(',').map { it.trim().toDouble() }.toList()).toMap()
+        val connectionCapacity = iConnectionCapacity.text.splitToSequence(',').map { it.trim().toDouble() }.toList()
+        val instance = CappedHoseCycleInstance(graph, order, terminalCapacity, connectionCapacity)
+
+        val (_, integerModel) = mipSolver.computeSolution(instance)
         this.integerModel = integerModel
 
         val lp = integerModel.relax()
@@ -449,11 +465,9 @@ class IntegralityGapUI : JFrame("RND Integrality Gap") {
         @JvmStatic
         fun main(args: Array<String>) {
             EventQueue.invokeLater {
-                IntegralityGapUI().isVisible = true
+                CapHoseIntegralityGapUI().isVisible = true
             }
         }
-
-        private const val ZERO_CHAR = '0'.toInt()
 
         private const val EPSILON = 10E-5
 

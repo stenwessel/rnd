@@ -1,0 +1,276 @@
+\section{Generalized VPN problem}
+We consider an undirected graph $G = (V_G, E_G)$ with non-negative edge costs $c\colon E_G \to \reals_+$.
+A subset of the vertices are terminals $W \subseteq V_G$
+Traffic demands between terminals are be described by symmetric matrices $D = (d_ij)_{i,j \in W}$, where the non-negative entries $d_{ij} = d_{ji}$ describe the (undirected) traffic between two terminals $i,j \in W$.
+We assume the diagonal to be zero, i.e.\ $d_{ii} = 0$ for all $i \in W$.
+We define a universe of traffic demand matrices $\mathcal U_T$ that is described by an edge-capacitated tree $T = (V_T, E_T)$ with leaf set equal to the terminals $W$ and edge capacities $b\colon E_T \to \reals_+$.
+A traffic matrix belongs to $\mathcal U_T$ when it can be routed on $T$.
+
+A solution to the \emph{generalized VPN problem} defined by $(G, c, W, T, b)$ consists of a \emph{routing template} $\set{P_{ij}}_{i,j \in \binom{W}{2}}$ ($i$-$j$-paths in $G$ for each unordered pair of terminals), and `bought' edge capacities $u(e) \ge 0$ for all $e \in E_G$.
+A solution is \emph{feasible} all traffic demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template, and without exceeding the edge capacities $u$.
+A solution is \emph{optimal} if it is feasible and minimizes $\sum_{e \in E_G} c(e) u(e)$.
+
+Note that the generalized VPN problem is equivalent to an original VPN problem instance when $T$ is a star.
+
+\subsection{Algorithms}
+
+\begin{itemize}
+    \item Graph $G = (V_G, E_G)$ with edge cost $c_{uv}$
+    \item Demand tree $T = (V_T, E_T)$ with edge capacity $b_e$
+    \item Terminals $W \subseteq V_G$, equal to leaf set of $T$
+    \item Universe $\mathcal U_T \subseteq \mathcal S^W$ of demand matrices
+    \item $\binom{W}{2}$ denotes all unordered pairs of terminals
+\end{itemize}
+
+\begin{alignat*}{5}
+    \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
+    \text{subject to}\ && x_{uv} &\ge \max_{D \in \mathcal U_T} \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T,\ D \in \mathcal U^*_T} \\
+    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+                                                                1 & \text{if $u = i$} \\
+                                                                -1 & \text{if $u = j$} \\
+                                                                0 & \text{otherwise}
+    \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \\
+    && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
+    && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
+\end{alignat*}%
+
+
+Row generation subproblems (for all $uv \in E_G$)
+            \begin{alignat*}{5}
+                \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
+                \text{subject to}\quad && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \\
+                && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
+            \end{alignat*}
+            If $D^*$ has objective $> \tilde x_{uv}$, add $D^*$ to $\mathcal U_T^*$.
+
+\begin{alignat*}{5}
+    \text{maximize}\ && \sum_{ij \in \binom{W}{2}} (f_{uv}^{ij} + f_{vu}^{ij}) \cdot D_{ij} &&& \\
+    \text{subject to}\ && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \qquad (\omega_e^{uv}) \\
+    && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
+\end{alignat*}
+\hrulefill
+\begin{alignat*}{5}
+    \text{minimize}\ && \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&& \\
+    \text{subject to}\ && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{ij \in \binom{W}{2}} \\
+    && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{e \in E_T}
+\end{alignat*}
+
+\begin{alignat*}{5}
+    \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
+    \text{subject to}\ && x_{uv} &\ge \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&\qquad \forall_{uv \in E_G} \\
+    && \sum_{e \in \pi_T(i,j) \omega_e^{uv}} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \\
+    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+                                                                1 & \text{if $u = i$} \\
+                                                                -1 & \text{if $u = j$} \\
+                                                                0 & \text{otherwise}
+    \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \\
+    && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
+    && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G,\ e \in E_T} \\
+    && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
+\end{alignat*}%
+
+\begin{algorithm}
+    \caption{RecursiveHubbing}
+    \label{alg:TriangulateStar}
+    \begin{algorithmic}[1]
+        \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T - W$ and $h$ is an empty mapping from $V_T$ to $V_G$. In the actual implementation, we also maintain a set of all best mappings that attain the minimum cost.
+
+        \Procedure{Assign}{verticesToAssign, $h$}
+            \If {verticesToAssign is empty}
+                \State \Return $\sum_{\set{u, v} \in E_T} d(h(u), h(v))$ \Comment{The cost of mapping $h$}
+            \EndIf
+
+            \State $u$ = verticesToAssign.first()
+            \State bestCost = $\infty$
+
+            \ForAll {vertices $v$ in graph}
+                \State $h(u)$ = $v$
+                \State currentCost = \textsc{Assign}(verticesToAssign $-$ $u$, $h$)
+
+                \If {currentCost $<$ bestCost}
+                    \State bestCost = currentCost
+                \EndIf
+            \EndFor
+
+            \State \Return bestCost
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+%TODO Die recurrence een reference geven (hahaha sorry alvast)
+\begin{algorithm}
+    \caption{Finding all subtrees for the dynamic programming algorithm}
+    \label{alg:idk}
+    \begin{algorithmic}[1]
+        \Statex Obtaining all subtrees that are needed for the dynamic programming algorithm.
+        The dynamic program itself only fills in the table based on the recurrence stated below.
+        \Procedure{GetSubtrees}{$V_T, E_T, W$}
+            \State root = arbitrary node in $V_T - W$
+
+            \State $\mathcal S$ = empty list
+            \State $\mathcal S$.add(Subtree(root, root.neighbors, null)) \Comment{A subtree has a root, children and parent}
+            \State $\mathcal Q$.addAll($\mathcal S$)
+
+            \While {$\mathcal Q$ is not empty}
+                \State tree = $\mathcal Q$.removeFirst
+                \State currentRoot = tree.root
+                \ForAll{vertices $r$ in tree.children}
+                    \State $S$ = Subtree($r$, $r$.neighbors $-$ currentRoot, currentRoot)
+                    \State $\mathcal S$.add($S$)
+                    \State $\mathcal Q$.add($S$)
+                \EndFor
+            \EndWhile
+            \State \Return subtrees.reversed()
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Recurrence:
+\[
+    T[S, v] = \begin{cases}
+                  0 &\text{if $S$.root $\in W$ and $S$.root = $v$} \\
+                  \infty &\text{if $S$.root $\in W$ and $S$.root $\neq$ $v$} \\
+                  \displaystyle \sum_{r \in S.\text{children}} \min_{w \in V_G} \Big( T[S_r, w] + b(\set{r, S.\text{root}}) \cdot d(v, w) \Big) &\text{otherwise} \\
+    \end{cases}
+\]
+When the table is completely filled, the returned result is obtained by computing $\min_{v \in V_G} T[S_T, v]$, where $S_T$ denotes the (unique) subtree containing all vertices of $T$.
+
+\subsection{Experiments}
+All the experiments we have seen.
+Integrality gap results.
+
+\subsection{Ring networks}
+The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where the considered network is a ring.
+In the following, we will discuss whether it is possible to extend the proof to the generalized VPN conjecture, for the cases where the network is a ring and the demand tree is a \emph{two-union star}: the tree formed by connecting the centers of two star graphs.
+
+Some background of what steps we are taking is identical to what is described in \cite{grandoni2008short} and we will omit these details.
+We focus on showing the differences that are necessary in the proof to adapt to the generalized VPN problem setting.
+We use the same notation as used in the aforementioned paper, except where the generalized VPN problem differs from the VPN problem.
+
+For the remainder, we restrict ourselves to instances where $T$ is a \emph{two-union star}, that is, a tree formed by connecting the centers $r_1,\ r_2$ of two star graphs.
+We will call this edge $r = \set{r_1, r_2}$ and refer to it as the \emph{bridge} of $T$.
+
+\subsubsection{Preliminaries}
+A number of assumptions are made in \cite{grandoni2008short}, the most important being that we can assume the capacities $b \equiv 1$.
+We suspect this does not quite generalize to our case, but we can state the following:
+
+\begin{fact}
+    We may assume $b(f) = 1$ when $f \neq r$.
+\end{fact}
+Using the same motivation as in \cite{grandoni2008short}, if the capacity $b(iu)$ for the terminal $i \in W$ is not unit, construct a new instance with new terminals $i_1, \dots, i_{b(iu)}$, connected to the site of $i$ in $G$, with edge cost $0$.
+Set the capacities of the incident edges in $T$ to unit.
+Note that this instance is equivalent, but may change the topology of the graph.
+
+An alternative construction is argued in \cite{grandoni2008short} to keep the topology a ring and we refer to this paper for the motivation.
+
+\begin{fact}
+    We can assume $b$ to be integral.
+\end{fact}
+This is motivated by scaling by a sufficiently large factor (excluding weird irrational cases, but that is probably fine).
+
+\subsubsection{Pyramidal Routing problem}
+To goal is to show that there exists an optimal solution to the generalized VPN problem that is a tree solution (or, equivalently, there exists a tree solution to the generalized VPN problem that is optimal).
+Consider an optimal tree solution $(\set{P_{ij}}, u)$ to a generalized VPN instance $(G, c, W, T, b)$, with $|W| = k$ and $T$ a two-union star with the unit capacity assumption as above.
+Let $\mathcal P_i$ be as in \cite{grandoni2008short} for a fixed $i \in W$.
+We define
+\[
+    \xi(e, \mathcal P_i) \coloneqq \min\set{\alpha(e, \mathcal P_i),\ \beta(e, \mathcal P_i)} + \min\set{n(e, \mathcal P_i) - \alpha(e, \mathcal P_i),\ k - n(e, \mathcal P_i) - \beta(e, \mathcal P_i)}
+\]
+where
+\begin{gather*}
+    n(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij}}|,\\
+    \alpha(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \in P_{ij},\ r \in \pi_T(i, j)}|,\\
+    \beta(e, \mathcal P_i) \coloneqq |\set{j \in W \setminus \set{i} : e \not\in P_{ij},\ r \not\in \pi_T(i, j)}|,
+\end{gather*}
+that is, $\alpha(e, \mathcal P_i)$ is the number of paths in $\mathcal P_i$ containing $e$, \emph{while simultaneously the path in the demand tree between $i$ and $j$ crosses the bridge}.
+In our setting, we have a different expression for the \emph{required} capacity of edge $e$:
+\[
+    u(e) = \xi(e, \mathcal P_i) + \min\Big\{b(r),\ n(e, \mathcal P_i) - \xi(e, \mathcal P_i),\ k - n(e, \mathcal P_i) -  \xi(e, \mathcal P_i)\Big\}.
+\]
+We can now formulate the generalized Pyramidal Routing (\emph{genPR}) problem with instance $(G, c, W, T, b, i)$ as to minimize $\sum_{e \in E_G} c(e) y(e, \mathcal P_i)$ over all $\mathcal P_i$ (for an arbitrary fixed $i \in W$), where we define
+\[
+    y(e, \mathcal P_i) = \xi(e, \mathcal P_i) + \min\Big\{b(r),\ n(e, \mathcal P_i) - \xi(e, \mathcal P_i),\ k - n(e, \mathcal P_i) -  \xi(e, \mathcal P_i)\Big\}.
+\]
+
+We now formulate our version of Conjecture~2 (as in \cite{grandoni2008short}).
+\renewcommand\theconjecture{2}
+\begin{conjecture}[The \emph{genPR} conjecture]
+    For each \emph{genPR} instance $(G, C, W, i, T, b)$ there exists an optimal solution which is a tree solution.
+\end{conjecture}
+
+We now show our version of Theorem~1 (having the same formulation as in \cite{grandoni2008short}), using the equivalent of Lemma~3, Claim~1, and Claim~2.
+
+\renewcommand\thelemma{3}
+\begin{lemma}
+    Consider an generalized VPN instance $(G, c, W, T, b)$ with $T$ a two-union star with bridge $r$, $b(f) = 1$ for $f \neq r$, and some feasible solution $(\set{P_{ij}}, u)$.
+    There exists a terminal $i \in W$ such that $\sum_{e \in E_G} c(e) u(e) \ge \sum_{e \in E_G} c(e) y(e, \mathcal P_i)$, where $\mathcal P_i = \set{P_{ij} : j \in W \setminus \set{i}}$.
+\end{lemma}
+\begin{proof}
+    Fix an edge $e \in E_G$.
+    We define the same traffic matrix $D^e = (d^e_{ij})_{i,j \in W}$ as in \cite{grandoni2008short},
+    \[
+        d^e_{ij} = \begin{cases}
+                       \frac 1 k \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) & \text{if $e \in P_{ij}$,} \\
+                       0 & \text{otherwise.}
+        \end{cases}
+    \]
+
+    Now, the proof of Claim~1 is slightly different, as our universe is described by a different set of inequalities.
+
+    \renewcommand\theclaim{1}
+    \begin{claim}
+        $D^e \in \mathcal U_T$, that is
+        \[
+            \sum_{\substack{ij \in \binom{W}{2}:\\f \in \pi_T(i,j)}} d^e_{ij} \le b(f)
+        \]
+        for all $f \in E_T$.
+    \end{claim}
+    \begin{proof}
+        We consider two cases:
+        \begin{itemize}
+            \item $f \neq r$, hence we can write $f = f_i$, where $f_i \in E_T$ is the edge incident some terminal $i \in W$.
+            Now note that we can write
+            \[
+                \sum_{\substack{\ell j \in \binom{W}{2}:\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} = \sum_{j \in W \setminus \set{i}} d^e_{ij}
+            \]
+            as $f_i$ is exactly in all paths from/to $i$ in the tree, as it is the edge incident to $i$.
+            The rest of this case follows the same steps as the proof in \cite{grandoni2008short}:
+            \[
+                \begin{split}
+                    \sum_{\substack{\ell j \in \binom{W}{2}:\\f_i \in \pi_T(\ell,j)}} d^e_{\ell j} &= \sum_{j \in W \setminus \set{i}} d^e_{ij} \\
+                    &= \frac 1 k \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} \left( \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                    &\le \frac 1 k \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} \left( \frac{k - n(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{n(e, \mathcal P_j)}{n(e, \mathcal P_j)} \right) \\
+                    &= \frac{1}{n(e, \mathcal P_i)} \sum_{\substack{j \in W \setminus \set{i}:\\ e \in P_{ij}}} 1 \\
+                    &= 1 \\
+                    &= b(f_i).
+                \end{split}
+            \]
+
+            \item $f = r$.
+            We have not been able, with the current definition of $y$ and $D^e$, to make this work.
+            However, we reduced it to a more accessible form.
+            In the third line, we exchange the order of the two sums and use the symmetry of $\pi_T(i, j)$ and $P_{ij}$.
+            \[
+                \begin{split}
+                    \sum_{\substack{ij \in \binom{W}{2},\\r \in \pi_T(i,j)}} d^e_{ij} &= \frac 1 2 \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j)}} d^e_{ij} \\
+                    &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                    &= \frac{1}{2k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} + \frac{1}{2k} \sum_{j \in W} \sum_{\substack{i \in W \setminus \set{j}:\\r \in \pi_T(j,i),\\e \in P_{ji}}} \frac{y(e, \mathcal P_j)}{n(e, \mathcal P_j)} \\
+                    &= \frac{1}{k} \sum_{i \in W} \sum_{\substack{j \in W \setminus \set{i}:\\r \in \pi_T(i,j),\\e \in P_{ij}}} \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \\
+                    &= \frac{1}{k} \sum_{\substack{i \in W:\\n(e, \mathcal P_i) > 0}} \left( \alpha(e, \mathcal P_i) \frac{y(e, \mathcal P_i)}{n(e, \mathcal P_i)} \right) \\
+                    &\ \vdots\\
+                    &\le b(r).
+                \end{split}
+            \] \qedhere
+        \end{itemize}
+
+    \end{proof}
+    The remainder of the proof of Lemma~3 (and Claim~2) is exactly the same as in \cite{grandoni2008short}, as the definition of $D^e$ is exactly the same, and the definition of $y(e, \mathcal P_i)$ itself is not used.
+\end{proof}
+
+From this follows (our version of) Theorem~1, stating that on ring networks, if there exists an optimal tree solution for the \emph{genPR} problem, that also an optimal tree solution exists for the generalized VPN problem.
+
+Now, what remains to show is that indeed an optimal tree solution exists for the \emph{genPR} problem when $G$ is a ring.
+If we follow the structure of the proof in \cite{grandoni2008short}, not first that Claim~3 also holds for our case.
+However, Claim~4 does not hold: it might be that $y(e, \mathcal P_i) = y(f, \mathcal P_i) = b(r)$ (in the second case of the definition of $y$).
+We have not quite yet mastered the inductive proof that follows (in which Claim~4) is used.
+Therefore, we are not sure that the counterexample for Claim~4 is actually problematic, or how to circumvent this issue.

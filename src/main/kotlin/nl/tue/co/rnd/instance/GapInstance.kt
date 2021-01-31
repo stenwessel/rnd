@@ -7,7 +7,7 @@ object GapInstance {
     fun constructGraph(numberOfTerminals: Int): WeightedGraph<Int> {
         val terminals = (1..numberOfTerminals).asSequence()
         val edges = terminals.map { i -> WeightedEdge(0, -i, 1.0) } + terminals.flatMap { i ->
-            terminals.filter { j -> j != i }.map { j -> WeightedEdge(i, -j, 1.0) }
+            terminals.filter { j -> j != i }.map { j -> WeightedEdge(i, -j, if (numberOfTerminals == 3) 2.0 else 1.0) }
         }
 
         return WeightedGraph((-numberOfTerminals..numberOfTerminals).toSet(), edges.toSet())

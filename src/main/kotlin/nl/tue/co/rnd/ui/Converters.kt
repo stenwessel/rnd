@@ -14,7 +14,9 @@ fun <V> WeightedGraph<V>.toGraphstream(id: String = "graph", terminals: Set<V> =
             }
         }
     }
-    for (e in this.edges) it.addEdge("{${e.first},${e.second}}", vertexMap[e.first], vertexMap[e.second])
+    for (e in this.edges) it.addEdge("{${e.first},${e.second}}", vertexMap[e.first], vertexMap[e.second]).apply {
+        this["weight"] = e.weight
+    }
 }
 
 operator fun Element.set(attribute: String, value: Any?) = this.setAttribute(attribute, value)

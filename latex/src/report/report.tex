@@ -1,28 +1,28 @@
 \documentclass[11pt]{article}
 
 % Packages
-\usepackage{amsmath}
+\usepackage[fleqn]{amsmath}
+
+\input{../macros.tex}
+
+\theoremstyle{definition}
+\newtheorem{fact}{Fact}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
 
 % Document
 \begin{document}
     \section{Introduction}
-        
-    \section{Generalized VPN problem}
+    % TODO
+    Introduce the literature that we have seen, background on the ideas and problems, VPN problem itself and their algorithms.
 
-    \subsection{Algorithms}
+    \input{genvpn}
 
-    \subsection{Experiments}
-
-    \subsection{Ring networks}
-    
-    \section{Capped hose model}
-
-    \subsection{Algorithms}
-
-    \subsection{Experiments}
-
-    \subsection{Demands on a cycle}
+    \input{cappedhose}
 
     \section{Conclusion}
+    % TODO
 
 \end{document}
