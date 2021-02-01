@@ -30,20 +30,20 @@
     Such as special class are the \emph{hose matrices} $\mathcal H = \set{(D_{ij}) : \sum_j D_{ij} \le b_i \quad \forall_{i \in W}}$, where $b_i$ denotes the \emph{marginal} demand for terminal $i$, that describes the maximum amount of traffic communicated from this terminal.
     The demands are viewed as undirected, hence $D_{ij} = D_{ji}$ describes the single demand between $i,j$.
     Designing a minimum cost network for the class of hose matrices is known as the \emph{virtual private network (VPN) problem}.
-    A $2$-approximation algorithm for the VPN problem was shown both in \cite{} and \cite{}.
-    It was conjectured \cite{} that this algorithm was in fact optimal.
-    The conjecture was initially shown to hold on ring networks (the constrained setting where $G$ is a cycle) and some other special cases~\cite{}, and was later resolved for arbitrary networks as well~\cite{}.
+    A $2$-approximation algorithm for the VPN problem was shown both in \cite{fingerhut1997designing} and \cite{gupta2001provisioning}.
+    It was conjectured \cite{italiano2006design} that this algorithm is in fact optimal.
+    The conjecture was initially shown to hold on ring networks (the constrained setting where $G$ is a cycle) and some other special cases~\cite{hurkens2007virtual}, and was later resolved for arbitrary networks as well~\cite{goyal2013vpn}.
 
-    In this report, we consider two other classes of (polyhedral) demand universes.
+    In this report, we consider two additional classes of (polyhedral) demand universes.
     We first look into \emph{tree demands}, generalizing the class of hose matrices.
-    The robust network design problem for tree demands is known as the \emph{generalized VPN} problem.
-    The 2-approximation algorithm for the VPN problem has a natural extension to the generalized case, and it is conjectured that this algorithm is optimal in this setting as well \cite{}.
+    The robust network design problem for tree demands is known as the \emph{generalized VPN problem}.
+    The 2-approximation algorithm for the VPN problem has a natural extension to the generalized case, and it is conjectured that this algorithm is optimal in this setting as well \cite{OLVER2016191}.
     However, this remains unresolved.
     In this report, we discuss this algorithm and discuss some efforts of proving the conjecture on ring networks.
 
     % TODO: introduction capped hose.
 
-    % TODO: V_G E_G
+    % TODO: V_G E_G and binom W 2
 
     \input{genvpn}
 
@@ -51,5 +51,8 @@
 
     \section{Conclusion}
     % TODO
+
+    \bibliographystyle{plain}
+    \bibliography{references}
 
 \end{document}

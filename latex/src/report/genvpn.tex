@@ -1,81 +1,91 @@
 \section{Generalized VPN problem}
-We consider an undirected graph $G = (V_G, E_G)$ with non-negative edge costs $c\colon E_G \to \reals_+$.
-A subset of the vertices are terminals $W \subseteq V_G$
-Traffic demands between terminals are be described by symmetric matrices $D = (d_ij)_{i,j \in W}$, where the non-negative entries $d_{ij} = d_{ji}$ describe the (undirected) traffic between two terminals $i,j \in W$.
-We assume the diagonal to be zero, i.e.\ $d_{ii} = 0$ for all $i \in W$.
-We define a universe of traffic demand matrices $\mathcal U_T$ that is described by an edge-capacitated tree $T = (V_T, E_T)$ with leaf set equal to the terminals $W$ and edge capacities $b\colon E_T \to \reals_+$.
-A traffic matrix belongs to $\mathcal U_T$ when it can be routed on $T$.
+To describe the generalized VPN problem, we first describe the class of tree demands.
+Let $G = (V_G, E_G)$ be the underlying network graph with terminal set $W \subseteq V_G$.
+Let an edge-capacitated tree $T = (V_T, E_T)$ be given with leaf set exactly the terminals $W$, and edge capacities $b_e$ for $e \in E_T$.
+Then $T$ describes the tree demand universe $\mathcal U_T$ where a symmetric demand matrix $(D_{ij})$ belongs to $\mathcal U_T$ when it can be routed on $T$.
+That is, for all edges $e$ on the (unique) path $\pi_T(i,j)$ between $i$ and $j$ in $T$ it must hold that $D_{ij} \le b_e$.
+Note that if we take $T$ to be a star with center $r$ and edge capacities $b_{ir} = b_i$, then $\mathcal U_T$ describes the same universe as the hose model $\mathcal H$ with marginal demands $b_i$.
+Hence, tree demands indeed generalize the hose model.
 
-A solution to the \emph{generalized VPN problem} defined by $(G, c, W, T, b)$ consists of a \emph{routing template} $\set{P_{ij}}_{i,j \in \binom{W}{2}}$ ($i$-$j$-paths in $G$ for each unordered pair of terminals), and `bought' edge capacities $u(e) \ge 0$ for all $e \in E_G$.
-A solution is \emph{feasible} all traffic demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template, and without exceeding the edge capacities $u$.
-A solution is \emph{optimal} if it is feasible and minimizes $\sum_{e \in E_G} c(e) u(e)$.
+The generalized VPN is now fully characterized by the underlying network graph $G$, a terminal set $W$, edge per-unit-capacity costs $c_e$ ($e \in E_G$), and the \emph{demand tree} $T$ with edge capacities $b_f$ ($f \in E_T$).
+A solution to the problem consists of a routing template $\mathcal P = \set{P_{ij} : i,j \in \binom W 2}$ and bought edge capacities $x_e$ for all $e \in E_G$.
+We call a solution \emph{feasible} when all demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template and without exceeding the installed edge capacities $x$.
+We furthermore call a solution optimal if it is feasible and minimizes $\sum_{e \in E_G} c_e x_e$.
 
-Note that the generalized VPN problem is equivalent to an original VPN problem instance when $T$ is a star.
+\subsection{Integer programming formulation}
+The generalized VPN problem can be formulated as the integer program~\eqref{eq:gvpn:mip:semiinf:obj}--\eqref{eq:gvpn:mip:semiinf:f}.
+\begin{alignat}{5}
+    \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \label{eq:gvpn:mip:semiinf:obj}\\
+    \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T} \label{eq:gvpn:mip:semiinf:demand}\\
+    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
+                                                                  1 & \text{if $u = i$} \\
+                                                                  -1 & \text{if $u = j$} \\
+                                                                  0 & \text{otherwise}
+    \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \label{eq:gvpn:mip:semiinf:flow}\\
+    && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \label{eq:gvpn:mip:semiinf:x}\\
+    && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \label{eq:gvpn:mip:semiinf:f}
+\end{alignat}
+Each edge $uv$ has constant cost $c_{uv}$ and has a non-negative variable $x_{uv}$ indicating the bought capacity for this edge.
+The objective is then to minimize the total cost, i.e.\ the sum of $c_{uv} x_{uv}$ over all edges $uv$.
 
-\subsection{Algorithms}
-
-The generalized VPN problem can be solved with integer programming.
-Each edge $uv$ has constant cost $c_{uv}$ and has a nonnegative variable $x_{uv}$ indicating the bought capacity for this edge.
-The objective is then to minimize the total cost, i.e.\ the sum over all edges $uv$ of $c_{uv} x_{uv}$.
-
-For each ordered pair of terminals $(i, j)$, a routing path between these terminals is constructed using binary flow variables.
+For each unordered pair of terminals $\set{i, j} \in \binom W 2$, a routing path between these terminals is constructed using binary flow variables.
 The flow variable $f_{uv}^{ij}$ indicates whether the directed edge $(u, v)$ is used on the path from terminal $i$ to $j$.
-This can be modeled with traditional flow constraints.
+This can be modeled with traditional flow constraints in constraint~\eqref{eq:gvpn:mip:semiinf:flow}.
 The routing path from $i$ to $j$ is then given by the set of directed edges $\set{(u, v) \in E_G | f_{uv}^{ij} = 1}$.
-By symmetry, we only need to consider one ordering of all ordered pairs.
+By symmetry, we only need to consider one ordering of all unordered pairs.
 For ease of notation, we will still describe flow variables with $f_{uv}^{ij}$.
 
-The last constraint ensures that we buy enough capacity on each edge.
+Constraint~\eqref{eq:gvpn:mip:semiinf:demand} ensures that we buy enough capacity on each edge.
 For a demand matrix $D \in \mathcal U_T$, we can derive the required capacity on an edge $uv$ using the flow variables.
 If $f^{ij}_{uv}$ or $f^{ij}_{vu}$ is 1, then we must buy $D_{ij}$ capacity on edge $uv$ to facilitate the flow between terminals $i$ and $j$.
 Thus, we obtain the constraint
 \[
-    x_{uv} \ge \sum_{ij \in W \choose 2} D_{ij} ( f^{ij}_{uv} + f^{ij}_{vu}),
+    x_{uv} \ge \sum_{ij \in \binom W 2} D_{ij} ( f^{ij}_{uv} + f^{ij}_{vu}),
 \]
 which must hold for any edge $uv$ and for any demand matrix $D_{ij} \in \mathcal U_T$.
-The complete program is defined in TODO ref. %TODO
 
-This definition leads to an infinite number of constraints as $\mathcal U_T$ is not a finite set of matrices.
-This issue can be resolved with row generation.
-We only consider a subset $\mathcal U_T^* \subset \mathcal U_T$.
-Then we obtain a solution that is valid for all $D \in \mathcal U_T^*$ and we try to find a matrix $D \in \mathcal U_T$ that violates the constraint.
-If such a matrix exists, we add it to $\mathcal U_T^*$ and repeat until we cannot find any violating matrix.
-
-
-
+This definition leads to an infinite number of constraints as $\mathcal U_T$ is in general not a finite set of matrices.
+This issue can be resolved with row generation, where we solve the program by only considering a subset $\mathcal U_T^* \subset \mathcal U_T$ in constraint~\eqref{eq:gvpn:mip:semiinf:demand}.
+Then we obtain a solution $(\tilde x, \tilde f)$ that is only valid for all $D \in \mathcal U_T^*$.
+We then assess whether there exists a matrix $D \in \mathcal U_T \setminus \mathcal U_T^*$ that violates the constraint.
+If such a matrix exists, we add it to $\mathcal U_T^*$ and solve the program again until we cannot find any violating matrix.
+Note that a violating matrix $D$ satisfies
+\[
+    \tilde x_{uv} < \sum_{ij \in \binom W 2} D_{ij} \cdot (\tilde f^{ij}_{uv} + \tilde f^{ij}_{vu})
+\]
+for some edge $uv \in E_G$.
+We can thus find such a violating matrix by solving the following linear subproblems, one for each $uv \in E_G$:
 \begin{alignat*}{5}
-    \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
-    \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T} \\
-    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
-                                                                1 & \text{if $u = i$} \\
-                                                                -1 & \text{if $u = j$} \\
-                                                                0 & \text{otherwise}
-    \end{cases} &&\qquad \forall_{u \in V_G,\ ij \in \binom{W}{2}} \\
-    && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
-    && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
-\end{alignat*}%
-
-
-Row generation subproblems (for all $uv \in E_G$)
-            \begin{alignat*}{5}
-                \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
-                \text{subject to}\quad && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \\
-                && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
-            \end{alignat*}
-            If $D^*$ has objective $> \tilde x_{uv}$, add $D^*$ to $\mathcal U_T^*$.
-
-\begin{alignat*}{5}
-    \text{maximize}\ && \sum_{ij \in \binom{W}{2}} (f_{uv}^{ij} + f_{vu}^{ij}) \cdot D_{ij} &&& \\
-    \text{subject to}\ && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \qquad (\omega_e^{uv}) \\
+    p_{uv} = \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
+    \text{subject to}\quad && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \\
     && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
 \end{alignat*}
-\hrulefill
-\begin{alignat*}{5}
-    \text{minimize}\ && \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&& \\
+If for any of these subproblems the optimal solution $D^*$ has objective $p_{uv} > \tilde x_{uv}$, we add $D^*$ to $\mathcal U_T^*$.
+Otherwise, $\mathcal U_T^*$ was representative for $\mathcal U_T$ and we can conclude that the integer program~\eqref{eq:gvpn:mip:semiinf:obj}--\eqref{eq:gvpn:mip:semiinf:f} is optimal.
+
+Although the row generation subproblems do not contain integer variables, the overall procedure to find an optimal solution for \eqref{eq:gvpn:mip:semiinf:obj}--\eqref{eq:gvpn:mip:semiinf:f} may use a large number of iterations.
+Using a clever dualization trick (also performed in~\cite{altin2007provisioning}) we can obtain a compact MIP formulation that does not require row generation.
+
+For this trick, consider a single edge $uv \in E_G$ and consider $f$ as parameters.
+Note that we can write constraint~\ref{eq:gvpn:mip:semiinf:demand} as
+\[
+    x_{uv} \ge \max_{D \in \mathcal U_T} \sum_{ij \in \binom W 2} D_{ij} \cdot (f^{ij}_{uv} + f^{ij}_{vu}),
+\]
+or, when writing out the polyhedral constraints describing $\mathcal U_T$, as the optimization problem
+\begin{alignat}{5}
+    x_{uv} \ge \text{maximize}\ && \sum_{ij \in \binom{W}{2}} (f_{uv}^{ij} + f_{vu}^{ij}) \cdot D_{ij} &&& \\
+    \text{subject to}\ && \sum_{\substack{ij \in \binom{W}{2}\\e \in \pi_T(i,j)}} D_{ij} &\le b_e &&\qquad \forall_{e \in E_T} \label{eq:gvpn:dualtrick} \\
+    && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
+\end{alignat}
+Since this linear program is feasible and bounded, we might just as well write the dual
+\begin{alignat}{5}
+    x_{uv} \ge \text{minimize}\ && \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&& \label{eq:gvpn:dualtrick:min} \\
     \text{subject to}\ && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{ij \in \binom{W}{2}} \\
     && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{e \in E_T}
-\end{alignat*}
-
+\end{alignat}
+where $\omega_e^{uv}$ are the  dual variables for constraint~\ref{eq:gvpn:dualtrick}.
+Now, note that we can drop the minimize in \ref{eq:gvpn:dualtrick:min} as the objective function of the original MIP is a non-negatively weighted sum of the variables $x_{uv}$.
+We now have thus obtained a compact MIP formulation for the generalized VPN problem:
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
     \text{subject to}\ && x_{uv} &\ge \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&\qquad \forall_{uv \in E_G} \\
@@ -88,8 +98,9 @@ Row generation subproblems (for all $uv \in E_G$)
     && x_{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G} \\
     && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{uv \in E_G,\ e \in E_T} \\
     && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}}
-\end{alignat*}%
+\end{alignat*}
 
+\subsection{Hierarchical hubbing algorithm}
 \begin{algorithm}
     \caption{RecursiveHubbing}
     \label{alg:TriangulateStar}
