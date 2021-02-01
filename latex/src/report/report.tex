@@ -1,6 +1,6 @@
 \documentclass[11pt]{article}
 
-% Packages
+\usepackage[a4paper,margin=2.5cm]{geometry}
 \usepackage[fleqn]{amsmath}
 
 \input{../macros.tex}
@@ -14,9 +14,36 @@
 
 % Document
 \begin{document}
-    \section{Introduction}
-    % TODO
-    Introduce the literature that we have seen, background on the ideas and problems, VPN problem itself and their algorithms.
+    \section{Introduction} \label{sec:introduction}
+    We consider a graph $G = (V, E)$ with a set of terminals $W \subseteq V$, together with a set of valid traffic demands between terminals represented by a matrix $(D_{ij})_{i,j \in W}$.
+    We refer to the set of valid demands as the \emph{demand universe} $\mathcal U$.
+    The goal in robust network design is to construct a network on $G$ by buying capacities on the edges such that every valid traffic demand can be routed on the network.
+    The usual challenge is to minimize the cost of the network, defined by $\sum_{e \in E} c_e x_e$, where $x_e$ denotes the bought capacity for edge $e$, and $c_e$ the per-unit-capacity cost of the edge.
+
+    Although the network needs to be able to route multiple demand matrices, we disallow changing the routing paths between terminals if demands change.
+    This is referred to the \emph{oblivious} routing model, where each pair of terminals $i,j \in W$ has a fixed routing path $P_{ij}$ for all routing all demands.
+    Hence, for every edge $e$ on the path $P_{ij}$ we must buy a capacity of at least $D_{ij}$, for each demand matrix $D \in \mathcal U$.
+    We refer to the set of paths $\mathcal P = \set{P_{ij} : i,j \in W}$ as the \emph{routing template}.
+    The routing template, together with the bought capacities for the edges, forms the solution to a robust network design problem.
+
+    Robust network design has been studied on specific classes of demand universes.
+    Such as special class are the \emph{hose matrices} $\mathcal H = \set{(D_{ij}) : \sum_j D_{ij} \le b_i \quad \forall_{i \in W}}$, where $b_i$ denotes the \emph{marginal} demand for terminal $i$, that describes the maximum amount of traffic communicated from this terminal.
+    The demands are viewed as undirected, hence $D_{ij} = D_{ji}$ describes the single demand between $i,j$.
+    Designing a minimum cost network for the class of hose matrices is known as the \emph{virtual private network (VPN) problem}.
+    A $2$-approximation algorithm for the VPN problem was shown both in \cite{} and \cite{}.
+    It was conjectured \cite{} that this algorithm was in fact optimal.
+    The conjecture was initially shown to hold on ring networks (the constrained setting where $G$ is a cycle) and some other special cases~\cite{}, and was later resolved for arbitrary networks as well~\cite{}.
+
+    In this report, we consider two other classes of (polyhedral) demand universes.
+    We first look into \emph{tree demands}, generalizing the class of hose matrices.
+    The robust network design problem for tree demands is known as the \emph{generalized VPN} problem.
+    The 2-approximation algorithm for the VPN problem has a natural extension to the generalized case, and it is conjectured that this algorithm is optimal in this setting as well \cite{}.
+    However, this remains unresolved.
+    In this report, we discuss this algorithm and discuss some efforts of proving the conjecture on ring networks.
+
+    % TODO: introduction capped hose.
+
+    % TODO: V_G E_G
 
     \input{genvpn}
 
