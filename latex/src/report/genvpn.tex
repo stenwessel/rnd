@@ -30,7 +30,7 @@ For a demand matrix $D \in \mathcal U_T$, we can derive the required capacity on
 If $f^{ij}_{uv}$ or $f^{ij}_{vu}$ is 1, then we must buy $D_{ij}$ capacity on edge $uv$ to facilitate the flow between terminals $i$ and $j$.
 Thus, we obtain the constraint
 \[
-    x_{uv} \ge \sum_{ij \in W \choose 2} D_{ij} \left( f^{ij}_{uv} + f^{ij}_{vu} \right),
+    x_{uv} \ge \sum_{ij \in W \choose 2} D_{ij} ( f^{ij}_{uv} + f^{ij}_{vu}),
 \]
 which must hold for any edge $uv$ and for any demand matrix $D_{ij} \in \mathcal U_T$.
 The complete program is defined in TODO ref. %TODO
@@ -46,7 +46,7 @@ If such a matrix exists, we add it to $\mathcal U_T^*$ and repeat until we canno
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
     \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T} \\
-    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
                                                                 1 & \text{if $u = i$} \\
                                                                 -1 & \text{if $u = j$} \\
                                                                 0 & \text{otherwise}
@@ -79,8 +79,8 @@ Row generation subproblems (for all $uv \in E_G$)
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
     \text{subject to}\ && x_{uv} &\ge \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&\qquad \forall_{uv \in E_G} \\
-    && \sum_{e \in \pi_T(i,j) \omega_e^{uv}} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \\
-    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+    && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \\
+    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
                                                                 1 & \text{if $u = i$} \\
                                                                 -1 & \text{if $u = j$} \\
                                                                 0 & \text{otherwise}
