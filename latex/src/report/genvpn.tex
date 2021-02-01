@@ -67,7 +67,7 @@ Although the row generation subproblems do not contain integer variables, the ov
 Using a clever dualization trick (also performed in~\cite{altin2007provisioning}) we can obtain a compact MIP formulation that does not require row generation.
 
 For this trick, consider a single edge $uv \in E_G$ and consider $f$ as parameters.
-Note that we can write constraint~\ref{eq:gvpn:mip:semiinf:demand} as
+Note that we can write constraint~\eqref{eq:gvpn:mip:semiinf:demand} as
 \[
     x_{uv} \ge \max_{D \in \mathcal U_T} \sum_{ij \in \binom W 2} D_{ij} \cdot (f^{ij}_{uv} + f^{ij}_{vu}),
 \]
@@ -83,8 +83,8 @@ Since this linear program is feasible and bounded, we might just as well write t
     \text{subject to}\ && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{ij \in \binom{W}{2}} \\
     && \omega_e^{uv} &\in \mathbb{R}_+ &&\qquad \forall_{e \in E_T}
 \end{alignat}
-where $\omega_e^{uv}$ are the  dual variables for constraint~\ref{eq:gvpn:dualtrick}.
-Now, note that we can drop the minimize in \ref{eq:gvpn:dualtrick:min} as the objective function of the original MIP is a non-negatively weighted sum of the variables $x_{uv}$.
+where $\omega_e^{uv}$ are the  dual variables for constraint~\eqref{eq:gvpn:dualtrick}.
+Now, note that we can drop the minimize in \eqref{eq:gvpn:dualtrick:min} as the objective function of the original MIP is a non-negatively weighted sum of the variables $x_{uv}$.
 We now have thus obtained a compact MIP formulation for the generalized VPN problem:
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
@@ -103,7 +103,7 @@ We now have thus obtained a compact MIP formulation for the generalized VPN prob
 \subsection{Hierarchical hubbing algorithm}
 \begin{algorithm}
     \caption{RecursiveHubbing}
-    \label{alg:TriangulateStar}
+    \label{alg:bruteForceHubbing}
     \begin{algorithmic}[1]
         \Statex Recursive enumeration algorithm to find all optimal mappings. Initially, verticesToAssign equals $V_T - W$ and $h$ is an empty mapping from $V_T$ to $V_G$. In the actual implementation, we also maintain a set of all best mappings that attain the minimum cost.
 
@@ -142,7 +142,7 @@ The total cost then becomes
 where $d_c(h(u), h(v))$ gives the distance between $h(u)$ and $h(v)$ in $G$ where $c$ defines the edge weights.
 It was conjectured that this algorithm is optimal, i.e.\ that an optimal hubbing solution is an optimal solution for the generalized VPN problem.
 
-Algorithm~\ref{alg:TriangulateStar} describes a recursive algorithm to find the optimal hubbing solution.
+Algorithm~\ref{alg:bruteForceHubbing} describes a recursive algorithm to find the optimal hubbing solution.
 With a standard recursive approach, the total cost is calculated for each mapping $h$ from $V_T \setminus W$ to $V_G$.
 The optimal cost is then returned; notice that the actual mapping can easily be returned as well.
 From this mapping, the routing templates can be derived.
