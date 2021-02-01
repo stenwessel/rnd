@@ -14,18 +14,39 @@ Note that the generalized VPN problem is equivalent to an original VPN problem i
 
 \subsection{Algorithms}
 
-\begin{itemize}
-    \item Graph $G = (V_G, E_G)$ with edge cost $c_{uv}$
-    \item Demand tree $T = (V_T, E_T)$ with edge capacity $b_e$
-    \item Terminals $W \subseteq V_G$, equal to leaf set of $T$
-    \item Universe $\mathcal U_T \subseteq \mathcal S^W$ of demand matrices
-    \item $\binom{W}{2}$ denotes all unordered pairs of terminals
-\end{itemize}
+The generalized VPN problem can be solved with integer programming.
+Each edge $uv$ has constant cost $c_{uv}$ and has a nonnegative variable $x_{uv}$ indicating the bought capacity for this edge.
+The objective is then to minimize the total cost, i.e.\ the sum over all edges $uv$ of $c_{uv} x_{uv}$.
+
+For each ordered pair of terminals $(i, j)$, a routing path between these terminals is constructed using binary flow variables.
+The flow variable $f_{uv}^{ij}$ indicates whether the directed edge $(u, v)$ is used on the path from terminal $i$ to $j$.
+This can be modeled with traditional flow constraints.
+The routing path from $i$ to $j$ is then given by the set of directed edges $\set{(u, v) \in E_G | f_{uv}^{ij} = 1}$.
+By symmetry, we only need to consider one ordering of all ordered pairs.
+For ease of notation, we will still describe flow variables with $f_{uv}^{ij}$.
+
+The last constraint ensures that we buy enough capacity on each edge.
+For a demand matrix $D \in \mathcal U_T$, we can derive the required capacity on an edge $uv$ using the flow variables.
+If $f^{ij}_{uv}$ or $f^{ij}_{vu}$ is 1, then we must buy $D_{ij}$ capacity on edge $uv$ to facilitate the flow between terminals $i$ and $j$.
+Thus, we obtain the constraint
+\[
+    x_{uv} \ge \sum_{ij \in W \choose 2} D_{ij} ( f^{ij}_{uv} + f^{ij}_{vu}),
+\]
+which must hold for any edge $uv$ and for any demand matrix $D_{ij} \in \mathcal U_T$.
+The complete program is defined in TODO ref. %TODO
+
+This definition leads to an infinite number of constraints as $\mathcal U_T$ is not a finite set of matrices.
+This issue can be resolved with row generation.
+We only consider a subset $\mathcal U_T^* \subset \mathcal U_T$.
+Then we obtain a solution that is valid for all $D \in \mathcal U_T^*$ and we try to find a matrix $D \in \mathcal U_T$ that violates the constraint.
+If such a matrix exists, we add it to $\mathcal U_T^*$ and repeat until we cannot find any violating matrix.
+
+
 
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
-    \text{subject to}\ && x_{uv} &\ge \max_{D \in \mathcal U_T} \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T,\ D \in \mathcal U^*_T} \\
-    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+    \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E_G,\ D \in \mathcal U_T} \\
+    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
                                                                 1 & \text{if $u = i$} \\
                                                                 -1 & \text{if $u = j$} \\
                                                                 0 & \text{otherwise}
@@ -58,8 +79,8 @@ Row generation subproblems (for all $uv \in E_G$)
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E_G} c_{uv} \cdot x_{uv} &&& \\
     \text{subject to}\ && x_{uv} &\ge \sum_{e \in E_T} b_e \cdot \omega_e^{uv} &&\qquad \forall_{uv \in E_G} \\
-    && \sum_{e \in \pi_T(i,j) \omega_e^{uv}} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \\
-    && \sum_{uv \in \delta(u)} f_{uv}^{ij} - f_{vu}^{ij} &= \begin{cases}
+    && \sum_{e \in \pi_T(i,j)} \omega_e^{uv} &\ge f_{uv}^{ij} + f_{vu}^{ij} &&\qquad \forall_{uv \in E_G,\ ij \in \binom{W}{2}} \\
+    && \sum_{uv \in \delta(u)} (f_{uv}^{ij} - f_{vu}^{ij}) &= \begin{cases}
                                                                 1 & \text{if $u = i$} \\
                                                                 -1 & \text{if $u = j$} \\
                                                                 0 & \text{otherwise}
