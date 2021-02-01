@@ -83,3 +83,17 @@
     abstract = {Abstract We investigate a network design problem under traffic uncertainty that arises when provisioning Virtual Private Networks (VPNs): given a set of terminals that must communicate with one another, and a set of possible traffic matrices, sufficient capacity has to be reserved on the links of the large underlying public network to support all possible traffic matrices while minimizing the total reservation cost. The problem admits several versions depending on the desired topology of the reserved links, and the nature of the traffic data uncertainty. We present compact linear mixed-integer programming formulations for the problem with the classical hose traffic model and for a less conservative robust variant relying on the traffic statistics that are often available. These flow-based formulations allow us to solve optimally medium-to-large instances with commercial MIP solvers. We also propose a combined branch-and-price and cutting-plane algorithm to tackle larger instances. Computational results obtained for several classes of instances are reported and discussed. © 2006 Wiley Periodicals, Inc. NETWORKS, Vol. 49(1), 100–115 2007},
     year = {2007}
 }
+@inproceedings{olver2010approxrnd,
+    author = {Olver, Neil and Shepherd, F. Bruce},
+    title = {Approximability of Robust Network Design},
+    year = {2010},
+    isbn = {9780898716986},
+    publisher = {Society for Industrial and Applied Mathematics},
+    address = {USA},
+    abstract = {We consider robust network design problems where the set of feasible demands may be given by an arbitrary polytope or convex body more generally. This model, introduced by Ben-Ameur and Kerivin [2], generalizes the well studied virtual private network (VPN) problem. Most research in this area has focused on finding constant factor approximations for specific polytope of demands, such as the class of hose matrices used in the definition of VPN. As pointed out in [4], however, the general problem was only known to be APX-hard (based on a reduction from the Steiner tree problem). We show that the general robust design is hard to approximate to within polylogarithmic factors. We establish this by showing a general reduction of buy-at-bulk network design to the robust network design problem.In the second part of the paper, we introduce a natural generalization of the VPN problem. In this model, the set of feasible demands is determined by a tree with edge capacities; a demand matrix is feasible if it can be routed on the tree. We give a constant factor approximation algorithm for this problem that achieves factor 8 in general, and 2 for the case where the tree has unit capacities.},
+    booktitle = {Proceedings of the Twenty-First Annual ACM-SIAM Symposium on Discrete Algorithms},
+    pages = {1097–1105},
+    numpages = {9},
+    location = {Austin, Texas},
+    series = {SODA '10}
+}

@@ -129,7 +129,7 @@ We now have thus obtained a compact MIP formulation for the generalized VPN prob
     \end{algorithmic}
 \end{algorithm}
 
-TODO ref suggested an 8-approximation algorithm for this problem. %TODO ref
+Olver and Shepherd suggested an 8-approximation algorithm for this problem~\cite{olver2010approxrnd}.
 They considered the optimal solution over all \emph{hubbing solutions}.
 A hubbing solution maps each internal node in the demand tree to a vertex in $V_G$.
 Each terminal must be mapped to its corresponding vertex in $G$.
@@ -147,7 +147,7 @@ With a standard recursive approach, the total cost is calculated for each mappin
 The optimal cost is then returned; notice that the actual mapping can easily be returned as well.
 From this mapping, the routing templates can be derived.
 
-However, it is possible to determine the optimal hubbing solution more efficiently using dynamic programming. %TODO ref
+However, it is possible to determine the optimal hubbing solution more efficiently using dynamic programming~\cite{olver2010approxrnd}.
 We first pick an arbitrary internal node of the demand tree as root.
 Then we root the demand tree here.
 A subtree of this tree is a tree that is rooted at a vertex in this tree, i.e.\ a vertex and all nodes below it.
@@ -191,7 +191,7 @@ This gives the following recurrence.
             \State $\mathcal Q$.add($S$)
 
             \While {$\mathcal Q$ is not empty}
-                \State tree = $\mathcal Q$.removeFirst
+                \State tree $\gets \mathcal Q$.removeFirst()
                 \State currentRoot $\gets$ tree.root
                 \ForAll{vertices $r$ in tree.children}
                     \State $S$ = Subtree($r$, $r$.neighbors $-$ currentRoot, currentRoot)
