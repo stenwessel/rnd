@@ -1,16 +1,16 @@
 \section{Generalized VPN problem}
-We consider an undirected graph $G = (V_G, E_G)$ with non-negative edge costs $c\colon E_G \to \reals_+$.
-A subset of the vertices are terminals $W \subseteq V_G$
-Traffic demands between terminals are be described by symmetric matrices $D = (d_ij)_{i,j \in W}$, where the non-negative entries $d_{ij} = d_{ji}$ describe the (undirected) traffic between two terminals $i,j \in W$.
-We assume the diagonal to be zero, i.e.\ $d_{ii} = 0$ for all $i \in W$.
-We define a universe of traffic demand matrices $\mathcal U_T$ that is described by an edge-capacitated tree $T = (V_T, E_T)$ with leaf set equal to the terminals $W$ and edge capacities $b\colon E_T \to \reals_+$.
-A traffic matrix belongs to $\mathcal U_T$ when it can be routed on $T$.
+To describe the generalized VPN problem, we first describe the class of tree demands.
+Let $G = (V_G, E_G)$ be the underlying network graph with terminal set $W \subseteq V_G$.
+Let an edge-capacitated tree $T = (V_T, E_T)$ be given with leaf set exactly the terminals $W$, and edge capacities $b_e$ for $e \in E_T$.
+Then $T$ describes the tree demand universe $\mathcal U_T$ where a symmetric demand matrix $(D_{ij})$ belongs to $\mathcal U_T$ when it can be routed on $T$.
+That is, for all edges $e$ on the (unique) path $\pi_T(i,j)$ between $i$ and $j$ in $T$ it must hold that $D_{ij} \le b_e$.
+Note that if we take $T$ to be a star with center $r$ and edge capacities $b_{ir} = b_i$, then $\mathcal U_T$ describes the same universe as the hose model $\mathcal H$ with marginal demands $b_i$.
+Hence, tree demands indeed generalize the hose model.
 
-A solution to the \emph{generalized VPN problem} defined by $(G, c, W, T, b)$ consists of a \emph{routing template} $\set{P_{ij}}_{i,j \in \binom{W}{2}}$ ($i$-$j$-paths in $G$ for each unordered pair of terminals), and `bought' edge capacities $u(e) \ge 0$ for all $e \in E_G$.
-A solution is \emph{feasible} all traffic demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template, and without exceeding the edge capacities $u$.
-A solution is \emph{optimal} if it is feasible and minimizes $\sum_{e \in E_G} c(e) u(e)$.
-
-Note that the generalized VPN problem is equivalent to an original VPN problem instance when $T$ is a star.
+The generalized VPN is now fully characterized by the underlying network graph $G$, a terminal set $W$, edge per-unit-capacity costs $c_e$ ($e \in E_G$), and the \emph{demand tree} $T$ with edge capacities $b_f$ ($f \in E_T$).
+A solution to the problem consists of a routing template $\mathcal P = \set{P_{ij} : i,j \in \binom W 2}$ and bought edge capacities $x_e$ for all $e \in E_G$.
+We call a solution \emph{feasible} when all demand matrices in $\mathcal U_T$ can be routed on $G$ according to the routing template and without exceeding the installed edge capacities $x$.
+We furthermore call a solution optimal if it is feasible and minimizes $\sum_{e \in E_G} c_e x_e$.
 
 \subsection{Algorithms}
 
