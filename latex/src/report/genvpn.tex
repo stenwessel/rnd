@@ -170,9 +170,9 @@ We minimize the cost of this subtree over all possible choices for $w$.
 This gives the following recurrence.
 \[
     C[S_r, v] = \begin{cases}
-                  0 &\text{if $r \in W$ and $r = v$} \\
-                  \infty &\text{if $r \in W$ and $r \neq v$} \\
-                  \displaystyle \sum_{\text{children $r_i$ of $r$}} \min_{w \in V_G} \set{ C[S_{r_i}, w] + b_{r, r_i} d(v, w) } &\text{otherwise} \\
+                  0 &\text{if $r \in W$ and $r = v$,} \\
+                  \infty &\text{if $r \in W$ and $r \neq v$,} \\
+                  \displaystyle \sum_{\text{children $r_i$ of $r$}} \min_{w \in V_G} \set{ C[S_{r_i}, w] + b_{r, r_i} d(v, w) } &\text{otherwise.} \\
     \end{cases}
 \]
 
@@ -205,35 +205,36 @@ This gives the following recurrence.
 \end{algorithm}
 
 \subsection{Experiments}
-Using the implementation of the exact MIP formulation and the dynamic programming solution with hubs, we tried to find instances where the optimal solutions have different objective values.
+Using the implementation of the exact MIP formulation (using Gurobi) and the dynamic programming solution with hubs, we tried to find instances where the optimal solutions have different objective values.
 That would be a counterexample for the conjecture that the dynamic programming algorithm is optimal.
 We are also interested in instances where the LP relaxation leads to an integrality gap, because %TODO mag Sten uitleggen. %TODO waarom ookalweer
 
 \subsubsection{The Petersen graph with a 2-union star}
-In our first experiments, we considered the Petersen graph with unit edge cost as network $G$.
-The demand tree $T$ was a 2-union star.
+In our first experiments, we considered the Petersen graph with unit edge cost as the network $G$.
+We construct an instance as follows.
+The demand tree $T$ is a \emph{two-union star}, that is, two star graphs where the centers are connected by an edge.
 We considered all possible sets of terminals $W \subseteq V_G$.
 For a set of terminals $W$, we considered all partitions of $W$ into $W_1$ and $W_2$.
-Then all terminals in $W_1$ were connected to an internal vertex and all terminals in $W_2$ were connected to another internal vertex (creating two stars).
-The two internal vertices were connected with an edge, called the \emph{bridge}.
+Then all terminals in $W_1$ are connected to an internal vertex and all terminals in $W_2$ are connected to another internal vertex (creating two stars).
+The two internal vertices are connected with an edge, called the \emph{bridge}.
 
 This leads to a total of $68\,185$ instances.
-None of these gave a counterexample for the conjecture, nor did any instance lead to an integrality gap in the integer program.
+None of these gave a counterexample for the conjecture, nor did any instance yield an integrality gap for the integer program.
 
 \subsubsection{Randomized Petersen experiments}\label{subsubsec:random}
 In the following series of experiments, we again considered the Petersen graph as network $G$.
 However, we assigned randomized edge costs now, rather than using unit costs.
 The edge costs were sampled uniformly from $[1, 10]$.
 Each vertex was picked with probability $1/2$ as terminal while ensuring that there are at least four terminals.
-Otherwise, the demand tree reduces to a star and the problem becomes the normal VPN problem.
+Otherwise, the demand tree reduces to a star and the instance is equivalent to a regular VPN problem instance.
 
 Lastly, a demand tree is constructed that has the set terminals as leaves.
-The number of internal nodes is picked uniformly from $[3, |W|]$, where $W$ is the set of terminals.
+The number of internal nodes is sampled uniformly from $[3, |W|]$, where $W$ is the set of terminals.
 Then a spanning tree is randomly constructed on the internal nodes.
 The demand tree is then created by connecting each terminal to an arbitrary internal node and removing internal nodes that are leaves.
 The capacities of the edges in the demand tree are sampled from a geometric distribution with success probability $0.4$.
 
-Over $100\,000$ instances were generated, but none of these resulted in a counterexample or even an integrality gap.
+Over $100\,000$ instances were generated, but none of these resulted in a counterexample nor an integrality gap.
 
 \subsubsection{The augmented Petersen graph}
 For these experiments, the network $G$ is the \emph{augmented Petersen graph}.
@@ -266,7 +267,7 @@ We also considered realistic VPN instances, as provided by Laura, as network $G$
 The construction of the demand tree was randomized, similarly to the experiments in Section~\ref{subsubsec:random}.
 The edge weight of an edge that connects to a terminal is the provided terminal capacity.
 Capacities of edges between internal nodes are sampled from a normal distribution with as parameters the sample mean and sample variance of the terminal capacities.
-As these instances have more vertices and more terminals than the other instances, the MIP needs a lot of time and memory to solve them.
+As these instances have more vertices and many more terminals than the other instances, the solving the integer program requires an considerable amount of time and resources.
 We therefore only considered a few instances, but these did not result in counterexamples or integrality gaps.
 
 \subsubsection{Integrality gap instances}
