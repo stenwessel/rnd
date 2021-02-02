@@ -16,8 +16,6 @@ We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only al
 In this case, a dynamic programming algorithm is suggested by Bosman and Olver~\cite{bosman2017exploring}, for which it is shown that it is optimal when $b$ and $d$ are unit.
 Optimality remains an open problem for arbitrary $b$ and $d$.
 
-% TODO: mminimality, but explain this below
-
 \subsection{MIP formulation}
 As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
 We then use a dualization trick to obtain a compact formulation.
@@ -126,9 +124,8 @@ The last interval will go from $0$ to $n$ and this is the interval we are intere
 The minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)]$ will be the minimum cost.
 The actual mappings can be obtained by searching the table backwards.
 
-\subsection{Experiments}
-% TODO
-Experiments with integrality gap.
+%\subsection{Experiments}
+%Experiments with integrality gap.
 
 \subsection{Proving optimality of the hubbing algorithm in the cycle case}
 In this section, we explore an approach to generalize the proof in \cite{bosman2017exploring} that the hubbing programming algorithm is optimal when $H$ is a cycle and $b$, $d$ unit, to our setting where $b$ and $d$ are arbitrary.
