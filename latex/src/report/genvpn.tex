@@ -205,8 +205,65 @@ This gives the following recurrence.
 \end{algorithm}
 
 \subsection{Experiments}
-All the experiments we have seen.
-Integrality gap results.
+Using the implementation of the exact MIP formulation and the dynamic programming solution with hubs, we tried to find instances where the optimal solutions have different objective values.
+That would be a counterexample for the conjecture that the dynamic programming algorithm is optimal.
+We are also interested in instances where the LP relaxation leads to an integrality gap, because TODO mag Sten uitleggen. %TODO waarom ookalweer
+
+\subsubsection{The Petersen graph with a 2-union star}
+In our first experiments, we considered the Petersen graph with unit edge cost as network $G$.
+The demand tree $T$ was a 2-union star.
+We considered all possible sets of terminals $W \subseteq V_G$.
+For a set of terminals $W$, we considered all partitions of $W$ into $W_1$ and $W_2$.
+Then all terminals in $W_1$ were connected to an internal vertex and all terminals in $W_2$ were connected to another internal vertex (creating two stars).
+The two internal vertices were connected with an edge, called the \emph{bridge}.
+
+This leads to a total of $68\,185$ instances.
+None of these gave a counterexample for the conjecture, nor did any instance lead to an integrality gap in the integer program.
+
+\subsubsection{Randomized Petersen experiments}\label{subsubsec:random}
+In the following series of experiments, we again considered the Petersen graph as network $G$.
+However, we assigned randomized edge costs now, rather than using unit costs.
+The edge costs were sampled uniformly from $[1, 10]$.
+Each vertex was picked with probability $1/2$ as terminal while ensuring that there are at least four terminals.
+Otherwise, the demand tree reduces to a star and the problem becomes the normal VPN problem.
+
+Lastly, a demand tree is constructed that has the set terminals as leaves.
+The number of internal nodes is picked uniformly from $[3, |W|]$, where $W$ is the set of terminals.
+Then a spanning tree is randomly constructed on the internal nodes.
+The demand tree is then created by connecting each terminal to an arbitrary internal node and removing internal nodes that are leaves.
+The capacities of the edges in the demand tree are sampled from a geometric distribution with success probability $0.4$.
+
+Over $100\,000$ instances were generated, but none of these resulted in a counterexample or even an integrality gap.
+
+\subsubsection{The augmented Petersen graph}
+For these experiments, the network $G$ is the \emph{augmented Petersen graph}.
+This graph is defined as the Petersen graph with unit edge costs and an additional vertex.
+This additional vertex is connected to all vertices with an edge of cost 2.
+The terminals are the ten original vertices of the Petersen graph.
+
+The structure of the demand tree is shown in Figure~TODO ref.%TODO sten
+The tree has a (terminal) root node and a center node.
+These two vertices are connected with an edge of capacity either $3$, $5$ or $\infty$.
+Then we are going to pick groups of terminals.
+For each edge $uv$ of the original Petersen graph, we create a group of three vertices.
+First, one endpoint is picked, say $u$, and then its two neighbors other than $v$ are added.
+This gives a group of three vertices and we create such a group for each of the fifteen edges of the Petersen graph.
+For each group, we add three new leaves to the demand tree, connect them with weight 1 to a new interior node, and connect the interior node to the center with capacity $1$, $2$ or $3$.
+
+For each of the nine suggested combinations of capacities in the demand tree, we considered 200 sets of fifteen groups.
+None yielded a counterexample nor an integrality gap.
+Similarly, we also tried adding two groups for each edge (one for each endpoint), but this did not yield any results either.
+
+\subsubsection{Realistic VPN instances}
+We also considered realistic VPN instances, as provided by Laura, as network $G$.
+The construction of the demand tree was randomized, similarly to the experiments in~\ref{subsubsec:random}.
+The edge weight of an edge that connects to a terminal is the provided terminal capacity.
+Capacities of edges between internal nodes are sampled from a normal distribution with as parameters the sample mean and sample variance of the terminal capacities.
+As these instances have more vertices and more terminals than the other instances, the MIP needs a lot of time and memory to solve them.
+We therefore only considered a few instances, but these did not result in counterexamples or integrality gaps.
+
+\subsubsection{Integrality gap instances}
+Together with their proof of the VPN conjecture, Goyal, Olver and Shepherd provided instances that gave an integrality gap for the VPN problem~\cite{goyal2013vpn}.
 
 \subsection{Ring networks}
 The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where the considered network is a ring.
