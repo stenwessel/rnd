@@ -1,10 +1,6 @@
 \section{Capped hose model}
-Let $G = (V, E)$ be a graph with edge costs $c\colon E \to \mathbb R_+$, describing a network.
-Let $W \subseteq V$ be a set of terminals.
-Let $\mathcal U$ describe the universe of symmetric demand matrices $(D_{ij})_{i,j \in W}$ (we require that $D_{ii} = 0$ for all $i \in W$), describing the amount of traffic between two terminals.
-
-We consider a specific universe of demands, called the \emph{capped hose model}.
-We can describe the capped hose model is described by a polytope: each terminal $i$ has maximum capacity $b_i$ (as in the hose model), and additionally there is an upper bound $d_{ij}$ on the demand between terminals $i,j \in W$.
+In this section, we now turn to a different class of (symmetric) demand matrices, referred to as the \emph{capped hose model}.
+We can describe the capped hose model with linear constraints: each terminal $i$ has maximum capacity $b_i$ (as in the hose model), and additionally there is an upper bound $d_{ij}$ on the demand between terminals $i,j \in W$.
 Hence, we can describe the capped hose polytope $\mathcal H^\text{cap}(b, d)$ as all (symmetric) matrices $(D_{ij})_{i,j \in W}$ for which
 \[
     \begin{split}
@@ -15,16 +11,17 @@ Hence, we can describe the capped hose polytope $\mathcal H^\text{cap}(b, d)$ as
 Note that setting $d_{ij} = 0$ signals that terminals $i$ and $j$ may not communicate.
 
 We define a graph $H$ with vertex set the terminals $W$ and edges $W \times W$, weighted with $d_{ij}$.
-We will first derive a compact MIP formulation for general RND problems under the capped hose demand model.
+We will first derive a compact MIP formulation for general robust network design problems under the capped hose demand model.
 We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
-In this case, a dynamic programming algorithm is suggested by Bosman and Olver, for which it remains open whether it is optimal (for arbitrary $b$ and $d$).
+In this case, a dynamic programming algorithm is suggested by Bosman and Olver~\cite{bosman2017exploring}, for which it is shown that it is optimal when $b$ and $d$ are unit.
+Optimality remains an open problem for arbitrary $b$ and $d$.
 
 \subsection{MIP formulation}
 As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
 We then use a dualization trick to obtain a compact formulation.
 
 Let $x_{uv}$ denote the amount of capacity we buy of edge $\{u,v\}$ in the network graph $G$.
-The semi-infinite MIP formulation (the master problem) becomes
+The semi-infinite MIP formulation becomes
 \begin{alignat*}{5}
     \text{minimize}\ && \sum_{uv \in E} c_{uv} \cdot x_{uv} &&& \\
     \text{subject to}\ && x_{uv} &\ge \sum_{ij \in \binom{W}{2}} D_{ij} \cdot (f_{uv}^{ij} + f_{vu}^{ij}) &&\qquad \forall_{uv \in E,\ D \in \mathcal U^*} \\
@@ -38,19 +35,19 @@ The semi-infinite MIP formulation (the master problem) becomes
 \end{alignat*}
 where $\mathcal U^* \subseteq \mathcal H^\text{cap}(b, d)$, and is populated by solving the following row generation subproblems (for all $uv \in E$).
 Let $(\tilde x, \tilde f)$ denote the current optimal solution of the master problem.
-\begin{alignat*}{5}
+\begin{alignat}{5}
     \text{maximize}\quad && \sum_{ij \in \binom{W}{2}} (\tilde f_{uv}^{ij} + \tilde f_{vu}^{ij}) \cdot D_{ij} &&& \\
-    \text{subject to}\quad && D_{ij} &\le d_{ij} &&\qquad \forall_{ij \in \binom W 2} \\
-    && \sum_{\substack{j \in W:\\i \neq j}} D_{ij} &\le b_i &&\qquad \forall_{i \in W} \\
+    \text{subject to}\quad && D_{ij} &\le d_{ij} &&\qquad \forall_{ij \in \binom W 2} \label{eq:cap:constr1}\\
+    && \sum_{\substack{j \in W:\\i \neq j}} D_{ij} &\le b_i &&\qquad \forall_{i \in W} \label{eq:cap:constr2} \\
     && D_{ij} &\in \mathbb{R}_+ &&\qquad \forall_{ij \in \binom{W}{2}}
-\end{alignat*}
+\end{alignat}
 Let $D^*$ denote the optimal solution of the above row generation subproblem.
 If the objective of $D^*$ violates the constraint in the master problem (when its greater than $\tilde x_{uv}$), then we add $D^*$ to $\mathcal U^*$.
 
 \subsubsection{Compact formulation}
 To obtain the compact formulation, we dualize the subproblems.
 Fix an edge $uv \in E$.
-We introduce dual variables: $\psi_{ij}^{uv}$, for all $ij \in \binom W 2$, for the first constraint, and $\omega_i^{uv}$ for all $i \in \binom W 2$, for the second constraint.
+We introduce dual variables $\psi_{ij}^{uv}$, for all $ij \in \binom W 2$, for the constraint~\eqref{eq:cap:constr1}, and $\omega_i^{uv}$ for all $i \in \binom W 2$, for constraint~\eqref{eq:cap:constr2}.
 We then get the dual
 \begin{alignat*}{5}
     \text{minimize}\quad && \sum_{ij \in \binom{W}{2}} d_{ij} \cdot \psi_{ij}^{uv} + \sum_{i \in W} b_i \cdot \omega_i^{uv} &&& \\
@@ -74,19 +71,15 @@ Because of strong duality and because $x_{uv}$ appears with nonnegative coeffici
     && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
 \end{alignat*}
 
-For the specific case where the support of $(d_{ij})$ is a cycle a dynamic programming algorithm is suggested (but it remains open whether it is optimal for arbitrary $b$ and $d$).
+For the specific case where the support of $(d_{ij})$ is a cycle, an optimal dynamic programming algorithm is introduced in \cite{bosman2017exploring}, but it remains open whether it is optimal for arbitrary $b$ and $d$.
 We discuss this algorithm next.
 
-\subsection{Dynamic programming formulation}
-In Bosman's and Olver's paper ``Exploring the Tractability of the Capped Hose Model'', a dynamic program is suggested for these circumstances.
-They proved that it is optimal for unit capacities for the edges and vertices in the cycle $H$.
-We will implement this for arbitrary capacities and compare the outcome with the integer program.
-
-In the first step, the cycle $H$ is modified by adding an extra vertex between each terminal and the cycle.
+\subsection{The hubbing algorithm}
+To obtain a dynamic programming algorithm, we first consider a slightly modified demand cycle graph $H$.
+The cycle $H$ is modified by adding an extra vertex between each terminal and the cycle.
 The resulting graph is denoted with $\hat H$ and the new vertex adjacent to terminal $v$ in $\hat H$ is denoted with $\hat v$ (see Figure~\ref{fig:hdak}).
-We restrict ourselves to the situation where the capacities are minimal, i.e. cannot be reduced while keeping the problem the same.
-Thus, the capacity of an edge cannot be more than the capacity of an adjacent vertex.
-And the capacity of a vertex cannot be more than the sum of the capacities of the two adjacent edges.
+Although we consider arbitrary $b$ and $d$, we do not lose any generality by restricting ourselves to the situation where the capacities are minimal, i.e.\ cannot be reduced while keeping the problem the same.
+More concretely, this means that the capacity of an edge is not more than the capacity of an adjacent vertex, and the capacity of a vertex is not more than the sum of the capacities of the two adjacent edges.
 
 \begin{figure}
     \centering
@@ -131,50 +124,54 @@ The last interval will go from $0$ to $n$ and this is the interval we are intere
 The minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)]$ will be the minimum cost.
 The actual mappings can be obtained by searching the table backwards.
 
-\subsection{Experiments}
-% TODO
-Experiments with integrality gap.
+%\subsection{Experiments}
+%Experiments with integrality gap.
 
-\subsection{Demands on a cycle}
-We first try to generalize the proof that we can restrict to integral solutions (in the MIP formulation above).
-That is, we can assume $\omega_i(e)$ and $\psi_{ij}(e)$ are integral.
-Note that here we are slightly adapting the notation from above to match with Bosman and Olver: for an edge $e = \{u, v\}$ we now write $\omega_i(e)$ and $\psi_{ij}(e)$ instead of $\omega_i^{uv}$ and $\psi_{ij}^{uv}$.
+\subsection{Proving optimality of the hubbing algorithm in the cycle case}
+In this section, we explore an approach to generalize the proof in \cite{bosman2017exploring} that the hubbing programming algorithm is optimal when $H$ is a cycle and $b$, $d$ unit, to our setting where $b$ and $d$ are arbitrary.
 
-We slightly adapt our view of the problem (B\&O Section~2).
-Our goal is to specify a routing template $\mathcal P = \{ P_{ij} : \{i, j\} \in E(H) \}$, where $H = (W, E(H))$ is the support graph of $d_{ij}$.
-Given a routing template, we can write an expression for the minimum capacity we are required to buy for each edge:
+The original proof first shows that there is always an optimal solution with a certain nice structure, but is not quite yet a hubbing solution.
+A last, rather non-trivial step of the proof shows that this structure can in fact be transformed to a hubbing solution.
+
+
+To obtain this first structured optimal solution, it is first shown that we can restrict ourselves solutions of the compact MIP formulation where the (originally dual) variable from the row subproblem is integral.
+We now show that we can extend this integrality assumption to our case as well, in particular, we will show that we can restrict to solutions where $\omega$ and $\psi$ in our compact formulation are integral.
+We are now slightly adapting the notation from the previous sections to match with \cite{bosman2017exploring}: for an edge $e = \{u, v\}$ we now write $\omega_i(e)$ and $\psi_{ij}(e)$ instead of $\omega_i^{uv}$ and $\psi_{ij}^{uv}$.
+
+\subsubsection{Rephrashed version of the problem}
+In order to show this, we first write an expression for the minimum capacity we are required to buy for each edge, if we consider the routing template to be given.
+The required capacity for an edge $e \in E(G)$ becomes
 \[
-    u(e) = \max_{D \in \mathcal H^\text{cap}(b, d)} \sum_{\substack{ij \in \binom W 2 :\\e \in P_{ij}}} D_{ij}.
+    x(e) = \max_{D \in \mathcal H^\text{cap}(b, d)} \sum_{\substack{ij \in \binom W 2 :\\e \in P_{ij}}} D_{ij}.
 \]
-The resulting solution has cost $\sum_e c(e) u(e)$, and this we wish to minimize.
+The resulting solution has cost $\sum_e c(e) x(e)$, and this we wish to minimize.
 
-\subsubsection*{Rephrashed version of the problem}
 We can also formulate the dual version of the above, from which we obtain a convenient rephrased version of the problem.
-We thus get the following dual expression, as derived above:
+The dual is formulated as
 \[
     \begin{split}
-        u(e) = \text{min}\quad & \sum_{i \in W} b_i \omega_i(e) + \sum_{ij \in \binom W 2} d_{ij} \psi_{ij}(e) \\
+        x(e) = \min \quad & \sum_{i \in W} b_i \omega_i(e) + \sum_{ij \in \binom W 2} d_{ij} \psi_{ij}(e) \\
         \text{s.t.}\quad & \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \qquad \forall_{ij \in E(H) : e \in P_{ij}} \\
         & \omega_i(e),\ \psi_{ij}(e) \ge 0.
     \end{split}
 \]
 We then rephrase the problem as follows.
-Each terminal $i$ buys a capacity vector $\omega_i$, and each connection $ij$ buys a capacity vector $\psi_{ij}$ (indexed by the edges $e \in E$ of $G$), with the property that $\{ e \in E : \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \}$ contains an $i$--$j$-path, for each connection $ij \in E(H)$.
+Each terminal $i$ `buys' a capacity vector $\omega_i$, and each connection $ij$ `buys' a capacity vector $\psi_{ij}$ (indexed by the edges $e \in E$ of $G$), with the property that $\{ e \in E : \omega_i(e) + \omega_j(e) + \psi_{ij}(e) \ge 1 \}$ contains an $i$--$j$-path, for each connection $ij \in E(H)$.
 The goal is to minimize the total cost
 \[
     \sum_{e \in E} c(e) u(e) = \sum_{i} b_i c(\omega_i) + \sum_{ij} d_{ij} c(\psi_{ij}),
 \]
 where $c(\omega_i) = \sum_{e \in E} c(e) \omega_i(e)$ and $c(\psi_{ij}) = \sum_{e \in E} c(e) \psi_{ij}(e)$ (one can verify the total cost expression by substituting the dual objective for $u(e)$, merging the ``min''s, and re-arranging the summations).
 
-\subsubsection*{Integral solutions}
-We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can restrict to integral capacity vectors $(\boldsymbol \omega, \boldsymbol \psi)$.
+\subsubsection{Integral solutions}
+We will show that Lemma~4 of \cite{bosman2017exploring} generalizes to our case, i.e.\ that we can restrict to integral capacity vectors $(\boldsymbol \omega, \boldsymbol \psi)$.
 \begin{proof}
     First, note that in any optimal, possibly fractional, solution, we have that $0 \le \omega_i, \psi_{ij} \le 1$, by the nature of the dual formulation.
     Hence, if the solution is integral, we know that the capacity vectors are binary.
     It is convenient to express the solution as a collection of edge sets (which we denote with a capital letter) $\boldsymbol \Omega = (\Omega_i)$ and $\boldsymbol \Psi = (\Psi_{ij})$, where $\Omega_i = \{ e : \omega_i(e) = 1 \}$ and $\Psi_{ij} = \{ e : \psi_{ij}(e) = 1 \}$, i.e.\ the edges that each terminal/connection buys.
 
     We now assume that $H$ is a cycle, and show that there always exists an integral optimum solution to the capped hose problem.
-    Notice that $u(e)$ is phrased as a fractional $d$-capacitated $b$-matching problem on $H$, which has an integral optimal solution if $H$ is bipartite (since the constraint matrix is the incidence matrix of $H$, which is totally unimodular, see also Schrijver Thm~21.8).
+    Notice that $u(e)$ is phrased as a fractional $d$-capacitated $b$-matching problem on $H$, which has an integral optimal solution if $H$ is bipartite (since the constraint matrix is the incidence matrix of $H$, which is totally unimodular, see also \cite{schrijver2003combinatorial} Theorem~21.8).
     Hence, if $H$ is an even cycle, it is bipartite and we are done.
 
     Now, consider the case when $H$ is an odd cycle.
@@ -195,7 +192,7 @@ We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can res
     \end{itemize}
     costs no more than $(\boldsymbol \omega, \boldsymbol \psi)$.
 
-    The following closely resembles the arguments from B\&O\@.
+    The following closely resembles the arguments from \cite{bosman2017exploring}.
     We let $D$ be the traffic matrix from the primal solution.
     If we now route $D$ according to $(\boldsymbol \omega, \boldsymbol \psi)$, the flow between $i$ and $i+1$ can be split into flow between $i$--$v$ and flow between $v$--$(i+1)$, since every routing path passes through $e$, and thus through $v$.
 
@@ -217,7 +214,7 @@ We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can res
     Set the connection capacities $d'_{i-1,i'} = d_{i-1,i}$, $d'_{i'',i+1} = d_{i,i+1}$ and $d'_{u,v} = d_{u,v}$ for pairs $uv$ not involving $i$, $i'$ or $i''$.
     Set the terminal capacities $b'_{i'} = b'_{i''} = \infty$ and $b'_j = b_j$ otherwise.
 
-    \begin{figure}[h]
+    \begin{figure}
         \centering
         \includegraphics[width=.65\textwidth]{split}
         \caption{Construction of a new bipartite instance.} \label{fig:split}
@@ -231,17 +228,29 @@ We will show that Lemma~4 of B\&O generalizes to our case, i.e.\ that we can res
     Hence, $(\boldsymbol \omega', \boldsymbol \psi')$ is integral as $H'$ is bipartite, and hence $(\boldsymbol \omega, \boldsymbol \psi)$ is integral as well.
 \end{proof}
 
-The proof is useful as an extension of Lemma~4 from B\&O (for arbitrary $b$ and $d$).
+\subsubsection{Integrality gap instances}
+The proof is useful as an extension of Lemma~4 from \cite{bosman2017exploring}.
 For the compact MIP formulation above, this proof shows that if we can assume $f$ is integral, then this implies that $\omega$ and $\psi$ are also integral.
 Also the reverse implication holds, as for fixed integer $\omega$ and $\psi$ the problem reduces to a multicommodity flow problem with integer capacities.
 This does not mean, however, that the whole formulation is integral.
 Indeed, there exist instances for which an integrality gap is present, even for the case where $b$ and $d$ are unit.
-These instances are the natural extension of integrality gap instances identified for the VPN problem.
-The largest integrality gap we found so far is using the graph with $4$ terminals in Figure~\ref{fig:gap4}, where the cycle is defined by unit $b$ and $d$.
+These instances are the natural extension of integrality gap instances identified for the VPN problem and presented in \cite{goyal2013vpn}.
+The largest integrality gap we found is using the graph with $4$ terminals in Figure~\ref{fig:gap4}, where the cycle is defined by unit $b$ and $d$.
 This instance gives an integrality gap of $9/8$, which is the same integrality gap as found for the VPN problem.
+To the best of our knowledge, integrality gap instanced for the capped hose problem where $H$ is a cycle have not been identified before.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=.45\textwidth]{gap4}
     \caption{Integrality gap of $9/8$.} \label{fig:gap4}
 \end{figure}
+
+\subsubsection{Generalizing further}
+It remains open whether it is possible to generalize the rest of the proof any further, as there are some challenges still to overcome there.
+In short, the setup in definition~5 in \cite{bosman2017exploring} generalizes---maybe quite surprisingly---almost directly.
+The partition of the mentioned feasible solution $\bar{\boldsymbol X}$ into sets $\bar{\boldsymbol X}_i$ and $\bar{\boldsymbol X}_{i,i+1}$ will intuitively correspond to the edges that are bought by terminals and connections, respectively.
+We expect however that problems will arise in the proofs of lemma~11 and lemma~13, as here a solution $\bar{\boldsymbol X}$ is transformed into a different solution $\bar{\boldsymbol Y}$ by possibly switching edges from being bought by a terminal to being bought by a connection (or vice versa).
+We make this clear with the following intuitive but very informal argument.
+When being careful how many edges are switched, the cost of the resulting solution will not increase in the case where $b$ and $d$ are unit: you pay the same price for capacity regardless of whether the edge is bought by a terminal or a connection.
+For arbitrary $b$ and $d$ this is no longer the case, and switching `buyers' of edge capacity might increase the total cost of the solution.
+Luckily, the requirement that $b$ and $d$ are minimal gives some restriction on how much the cost can increase, but it is not immediately clear that the proofs of lemma~11 and lemma~13 will generalize.
