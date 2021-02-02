@@ -208,9 +208,36 @@ This gives the following recurrence.
 All the experiments we have seen.
 Integrality gap results.
 
-\subsection{Ring networks}
-The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where the considered network is a ring.
-In the following, we will discuss whether it is possible to extend the proof to the generalized VPN conjecture, for the cases where the network is a ring and the demand tree is a \emph{two-union star}: the tree formed by connecting the centers of two star graphs.
+\subsection{Proving the generalized VPN conjecture on ring networks}
+The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where $G$ is a ring.
+In this section, we will discuss an attempt to extend the proof to the generalized VPN conjecture, for the cases where the network is a ring and the demand tree is a \emph{two-union star}: the tree formed by connecting the centers of two star graphs.
+We refer to this edge between the centers as the bridge.
+
+As mentioned in \cite{grandoni2008short}, the hubbing solution that is computed by the polynomial-time algorithm is also a \emph{tree solution}, that is, the support of the routing template forms a tree.
+Exploiting this structure is key for the argument to work.
+In the generalized setting however, the hierarchical hubbing solution may not be a tree solution, even in the restricted case of the ring network with a two-union star demand tree.
+A small counterexample is given in Figure~\ref{fig:counterex-tree-solution}.
+In any optimal hubbing solution, the internal node $R^+$ needs to be mapped to either to the site of $B^+$ or $C^+$ in $G$.
+Symmetrically, $R^-$ needs to be mapped to either $B^-$ or $C^-$.
+The optimal hubbing solution is then no tree solution, as the shortest path between the mapped $R^+$ and $R^-$ uses the bottom edge between $C^+$ and $C^-$, while the shortest path between the mapped $R^+$ and $A^+$ goes via $A^-$, and likewise the shortest path between the mapped $R^-$ to $A^-$ goes via $A^+$.
+Indeed, the support of the routing template is the whole cycle $G$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.3\textwidth]{counterexample-tree-solution}
+    \caption{Counterexample that the optimal hubbing solution is a tree solution.} \label{fig:counterex-tree-solution}
+\end{figure}
+
+The above counterexample uses a demand tree with (at least) three terminals at either side of the two-union star, and one might wonder what happens for the case where there are only two terminals on one side (notice that the case is solved when having only one terminal, as then the demand tree reduces to a star).
+With a slightly different construction as in Figure~\ref{fig:counterex2}, we see that no tree solution is guaranteed here either. % TODO: explanation
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.3\textwidth]{counterexample2}
+    \caption{Counterexample that the optimal hubbing solution is a tree solution, when one side of the demand tree has only two terminals.}
+    \label{fig:counterex2}
+\end{figure}
+
 
 Some background of what steps we are taking is identical to what is described in \cite{grandoni2008short} and we will omit these details.
 We focus on showing the differences that are necessary in the proof to adapt to the generalized VPN problem setting.
@@ -224,18 +251,18 @@ A number of assumptions are made in \cite{grandoni2008short}, the most important
 We suspect this does not quite generalize to our case, but we can state the following:
 
 \begin{fact}
-    We may assume $b(f) = 1$ when $f \neq r$.
+    We may assume $b_f = 1$ when $f \neq r$.
 \end{fact}
-Using the same motivation as in \cite{grandoni2008short}, if the capacity $b(iu)$ for the terminal $i \in W$ is not unit, construct a new instance with new terminals $i_1, \dots, i_{b(iu)}$, connected to the site of $i$ in $G$, with edge cost $0$.
+Using the same motivation as in \cite{grandoni2008short}, if the capacity $b_{iu}$ for a terminal $i \in W$ is not unit, construct a new instance with new terminals $i_1, \dots, i_{b_{iu}}$, connected to the site of $i$ in $G$, with edge cost $0$.
 Set the capacities of the incident edges in $T$ to unit.
 Note that this instance is equivalent, but may change the topology of the graph.
 
-An alternative construction is argued in \cite{grandoni2008short} to keep the topology a ring and we refer to this paper for the motivation.
+An alternative construction is argued in \cite{grandoni2008short} to keep the topology a ring and we refer to this paper for the details.
 
 \begin{fact}
     We can assume $b$ to be integral.
 \end{fact}
-This is motivated by scaling by a sufficiently large factor (excluding weird irrational cases, but that is probably fine).
+This is motivated by scaling by a sufficiently large factor.
 
 \subsubsection{Pyramidal Routing problem}
 To goal is to show that there exists an optimal solution to the generalized VPN problem that is a tree solution (or, equivalently, there exists a tree solution to the generalized VPN problem that is optimal).
