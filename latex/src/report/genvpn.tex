@@ -101,7 +101,7 @@ We now have thus obtained a compact MIP formulation for the generalized VPN prob
 \end{alignat*}
 
 \subsection{Hierarchical hubbing algorithm}
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{RecursiveHubbing}
     \label{alg:bruteForceHubbing}
     \begin{algorithmic}[1]
@@ -163,7 +163,7 @@ Now suppose that we want to obtain the value for $C[S_r, v]$ for some vertex $r 
 Then the mappings of the subtrees are independent of each other.
 The contribution of one specific subtree $S_{r_i}$ to the cost of subtree $S_r$ is
 \[
-    \min_{w \in V_G} \left( C[S_{r_i}, w] + b_{r, r_i} d_c(v, w) \right).
+    \min_{w \in V_G} \set{C[S_{r_i}, w] + b_{r, r_i} d_c(v, w)}.
 \]
 Notice that the mapping of $r$ is $v$ and the mapping of $r_i$ is $w$ in this recurrence.
 We minimize the cost of this subtree over all possible choices for $w$.
@@ -172,11 +172,11 @@ This gives the following recurrence.
     C[S_r, v] = \begin{cases}
                   0 &\text{if $r \in W$ and $r = v$} \\
                   \infty &\text{if $r \in W$ and $r \neq v$} \\
-                  \displaystyle \sum_{\text{children $r_i$ of $r$}} \min_{w \in V_G} \Big( C[S_{r_i}, w] + b_{r, r_i} d(v, w) \Big) &\text{otherwise} \\
+                  \displaystyle \sum_{\text{children $r_i$ of $r$}} \min_{w \in V_G} \set{ C[S_{r_i}, w] + b_{r, r_i} d(v, w) } &\text{otherwise} \\
     \end{cases}
 \]
 
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{Finding all subtrees for the dynamic programming algorithm}
     \label{alg:subtrees}
     \begin{algorithmic}[1]
@@ -241,7 +241,7 @@ This graph is defined as the Petersen graph with unit edge costs and an addition
 This additional vertex is connected to all vertices with an edge of cost 2.
 The terminals are the ten original vertices of the Petersen graph.
 
-The structure of the demand tree is shown in Figure~TODO ref.%TODO sten
+The structure of the demand tree is shown in Figure~\ref{fig:augpetersen}.
 The tree has a (terminal) root node and a center node.
 These two vertices are connected with an edge of capacity either $3$, $5$ or $\infty$.
 Then we are going to pick groups of terminals.
@@ -249,6 +249,13 @@ For each edge $uv$ of the original Petersen graph, we create a group of three ve
 First, one endpoint is picked, say $u$, and then its two neighbors other than $v$ are added.
 This gives a group of three vertices and we create such a group for each of the fifteen edges of the Petersen graph.
 For each group, we add three new leaves to the demand tree, connect them with weight 1 to a new interior node, and connect the interior node to the center with capacity $1$, $2$ or $3$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{augpetersen}
+    \caption{Structure of the demand tree for the augmented Petersen graph instances.}
+    \label{fig:augpetersen}
+\end{figure}
 
 For each of the nine suggested combinations of capacities in the demand tree, we considered 200 sets of fifteen groups.
 None yielded a counterexample nor an integrality gap.
