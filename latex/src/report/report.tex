@@ -14,8 +14,16 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
+\title{Experiments and analysis for selected robust network design problem classes}
+\author{David Dekker \\ \texttt{d.j.c.dekker@student.tue.nl} \and Sten Wessel \\ \texttt{s.wessel@student.tue.nl}}
+\date{\today}
+
 % Document
 \begin{document}
+    \maketitle
+    \hrule
+    \bigskip
+
     \section{Introduction} \label{sec:introduction}
     We consider a graph $G = (V, E)$ with a set of terminals $W \subseteq V$, together with a set of valid traffic demands between terminals represented by a matrix $(D_{ij})_{i,j \in W}$.
     We refer to the set of valid demands as the \emph{demand universe} $\mathcal U$.
@@ -56,5 +64,9 @@
 
     \bibliographystyle{plain}
     \bibliography{references}
+
+    \clearpage
+    \appendix
+    \input{appendix}
 
 \end{document}
