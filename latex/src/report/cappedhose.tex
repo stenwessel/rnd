@@ -10,7 +10,7 @@ Hence, we can describe the capped hose polytope $\mathcal H^\text{cap}(b, d)$ as
 \]
 Note that setting $d_{ij} = 0$ signals that terminals $i$ and $j$ may not communicate.
 
-We define a graph $H$ with vertex set the terminals $W$ and edges $W \times W$, weighted with $d_{ij}$.
+We define a graph $H$ with as vertex set the terminals $W$ and edges $\binom W 2$, weighted with $d_{ij}$.
 We will first derive a compact MIP formulation for general robust network design problems under the capped hose demand model.
 We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
 In this case, a dynamic programming algorithm is suggested by Bosman and Olver~\cite{bosman2017exploring}, for which it is shown that it is optimal when $b$ and $d$ are unit.
