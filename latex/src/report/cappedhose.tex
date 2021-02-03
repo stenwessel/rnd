@@ -121,7 +121,8 @@ This leads to the following recurrence:
 
 We can now determine all values by first determining the base cases, then all valid intervals of length two, then length three etc.
 The last interval will go from $0$ to $n$ and this is the interval we are interested in.
-The minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)]$ will be the minimum cost.
+However, notice that for a mapping $h(0)$ of $\hat v_0$, table entry $C[0, n, h(0), h(0)]$ will count the cost between $v_0$ and $h(0)$ twice.
+Thus, the minimum cost is the minimum over all mappings $h(0)$ of $C[0, n, h(0), h(0)] - b_0 d(v_0, h(0))$.
 The actual mappings can be obtained by searching the table backwards.
 
 %\subsection{Experiments}
