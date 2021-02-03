@@ -304,7 +304,15 @@ Indeed, the support of the routing template is the whole cycle $G$.
 \end{figure}
 
 The above counterexample uses a demand tree with (at least) three terminals at either side of the two-union star, and one might wonder what happens for the case where there are only two terminals on one side (notice that the case is solved when having only one terminal, as then the demand tree reduces to a star).
-With a slightly different construction as in Figure~\ref{fig:counterex2}, we see that no tree solution is guaranteed here either. % TODO: explanation
+With a slightly different construction as in Figure~\ref{fig:counterex2}, we see that no tree solution is guaranteed here either.
+Notice that by increasing the number of red terminals, the red hub is forced to be placed at a red vertex on top, because that is the only way to ensure a constant cost between red terminals and the red hub.
+Therefore, only the edge between $a$ and $b$ is not used by the paths between red terminals and the red hub.
+For the location of the blue hub, vertices $a$ and $b$ are trivially suboptimal compared to placing the hub at $A$ or $B$.
+The last option is placing it at a red vertex on top, say $c$ without loss of generality.
+Then placing the blue hub at $A$ gives a cost of $3.5$ for all paths on the cycle connecting at lesat one blue vertex).
+Placing the hub at $B$ gives a cost of $6.3$ and placing the hub at $c$ gives a cost of $3.6$.
+Therefore, the blue hub will be placed at $A$ and the edge $ab$ will be used on the path from the blue hub to $B$.
+This means that all optimal hubbing solutions for this instance do not have a tree as support.
 
 \begin{figure}
     \centering
