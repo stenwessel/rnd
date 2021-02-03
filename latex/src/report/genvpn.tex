@@ -271,6 +271,16 @@ We therefore only considered a few instances, but these did not result in counte
 
 \subsubsection{Integrality gap instances}
 Together with their proof of the VPN conjecture, Goyal, Olver and Shepherd provided instances that gave an integrality gap for the VPN problem~\cite{goyal2013vpn}.
+We used a 2-union star as demand tree, where we tried all partitions of the terminals into these two halves and all relevant integer capacities of the bridge (i.e., not reducing to the original VPN problem).
+Notice that the original VPN instances did have an integrality gap.
+The result were interesting.
+We considered the graph with six terminals.
+For a partition with two terminals on one side and four on the other, and a bridge capacity of $1$, there was no integrality gap.
+However, for three terminals on both sides, we do see an integrality gap for a bridge capacity of 1 or 2.
+We observed the same behavior for larger instances: if one half has only two terminals, there is no integrality gap for a bridge capacity of $1$.
+However, when both sides have at least three terminals, there is an integrality gap.
+This lead to the idea that the generalized VPN problem might be easier on 2-union stars where one half only has two terminals.
+An attempt to prove that the conjecture holds in this situation will follow in the next paragraph.
 
 \subsection{The generalized VPN conjecture on ring networks} \label{subsec:genvpn:rings}
 The paper by Grandoni et al.~\cite{grandoni2008short} gives a short proof that the VPN conjecture is true for the cases where $G$ is a ring.
