@@ -13,8 +13,8 @@ Note that setting $d_{ij} = 0$ signals that terminals $i$ and $j$ may not commun
 We define a graph $H$ with as vertex set the terminals $W$ and edges $\binom W 2$, weighted with $d_{ij}$.
 We will first derive a compact MIP formulation for general robust network design problems under the capped hose demand model.
 We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
-In this case, a dynamic programming algorithm is suggested by Bosman and Olver~\cite{bosman2017exploring}, for which it is shown that it is optimal when $b$ and $d$ are unit.
-Optimality remains an open problem for arbitrary $b$ and $d$.
+In this case, a dynamic programming algorithm is suggested by Bosman and Olver~\cite{bosman2017exploring}, for which it is shown that it is exact when $b$ and $d$ are unit.
+Whether the algorithm is exact, remains an open problem for arbitrary $b$ and $d$.
 
 \subsection{MIP formulation}
 As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
@@ -71,7 +71,7 @@ Because of strong duality and because $x_{uv}$ appears with nonnegative coeffici
     && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
 \end{alignat*}
 
-For the specific case where the support of $(d_{ij})$ is a cycle, an optimal dynamic programming algorithm is introduced in \cite{bosman2017exploring}, but it remains open whether it is optimal for arbitrary $b$ and $d$.
+For the specific case where the support of $(d_{ij})$ is a cycle, an exact dynamic programming algorithm is introduced in \cite{bosman2017exploring}, but it remains open whether it is optimal for arbitrary $b$ and $d$.
 We discuss this algorithm next.
 
 \subsection{The hubbing algorithm}
@@ -128,8 +128,8 @@ The actual mappings can be obtained by searching the table backwards.
 %\subsection{Experiments}
 %Experiments with integrality gap.
 
-\subsection{Proving optimality of the hubbing algorithm in the cycle case}
-In this section, we explore an approach to generalize the proof in \cite{bosman2017exploring} that the hubbing programming algorithm is optimal when $H$ is a cycle and $b$, $d$ unit, to our setting where $b$ and $d$ are arbitrary.
+\subsection{Proving that the hubbing algorithm is exact in the cycle case}
+In this section, we explore an approach to generalize the proof in \cite{bosman2017exploring} that the hubbing programming algorithm is exact when $H$ is a cycle and $b$, $d$ unit, to our setting where $b$ and $d$ are arbitrary.
 
 The original proof first shows that there is always an optimal solution with a certain nice structure, but is not quite yet a hubbing solution.
 A last, rather non-trivial step of the proof shows that this structure can in fact be transformed to a hubbing solution.

@@ -43,7 +43,7 @@
     We define a graph $H$ with vertex set the terminals $W$ and edges $W \times W$, weighted with $d_{ij}$.
     We will first derive a compact MIP formulation for general RND problems under the capped hose demand model.
     We will then focus on the case where $H$ is a cycle, i.e.\ terminals are only allowed to communicate with its two direct neighbors in the cycle.
-    In this case, a dynamic programming algorithm is suggested by Bosman and Olver, for which it remains open whether it is optimal (for arbitrary $b$ and $d$).
+    In this case, a dynamic programming algorithm is suggested by Bosman and Olver, for which it remains open whether it is exact (for arbitrary $b$ and $d$).
 
     \section{MIP formulation}
     As for the VPN and generalized VPN problem, we first write the semi-infinite MIP formulation with the row generation subproblems.
@@ -100,7 +100,7 @@
         && f_{uv}^{ij},\ f_{vu}^{ij} &\in \{ 0, 1 \} &&\qquad \forall_{uv \in E,\ ij \in \binom{W}{2}}
     \end{alignat*}
 
-    For the specific case where the support of $(d_{ij})$ is a cycle a dynamic programming algorithm is suggested (but it remains open whether it is optimal for arbitrary $b$ and $d$).
+    For the specific case where the support of $(d_{ij})$ is a cycle a dynamic programming algorithm is suggested (but it remains open whether it is exact for arbitrary $b$ and $d$).
     We discuss this algorithm next.
 
     \section{Dynamic programming formulation}

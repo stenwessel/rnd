@@ -140,7 +140,7 @@ The total cost then becomes
     \sum_{uv \in E_T} b_{uv} d_c(h(u), h(v)),
 \]
 where $d_c(h(u), h(v))$ gives the distance between $h(u)$ and $h(v)$ in $G$ where $c$ defines the edge weights.
-It was conjectured that this algorithm is optimal, i.e.\ that an optimal hubbing solution is an optimal solution for the generalized VPN problem.
+It was conjectured that this algorithm is exact, i.e.\ that an optimal hubbing solution is an optimal solution for the generalized VPN problem.
 
 Algorithm~\ref{alg:bruteForceHubbing} describes a recursive algorithm to find the optimal hubbing solution.
 With a standard recursive approach, the total cost is calculated for each mapping $h$ from $V_T \setminus W$ to $V_G$.
@@ -206,7 +206,7 @@ This gives the following recurrence.
 
 \subsection{Experiments}
 Using the implementation of the exact MIP formulation (using Gurobi) and the dynamic programming solution with hubs, we tried to find instances where the optimal solutions have different objective values.
-That would be a counterexample for the conjecture that the dynamic programming algorithm is optimal.
+That would be a counterexample for the conjecture that the dynamic programming algorithm is exact.
 We are also interested in instances where the LP relaxation leads to an integrality gap, because these instances were harder to solve than instances where the relaxation already gave the solution.
 
 \subsubsection{The Petersen graph with a 2-union star}

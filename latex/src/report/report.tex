@@ -42,13 +42,13 @@
     The demands are viewed as undirected, hence $D_{ij} = D_{ji}$ describes the single demand between $i,j$.
     Designing a minimum cost network for the class of hose matrices is known as the \emph{virtual private network (VPN) problem}.
     A $2$-approximation algorithm for the VPN problem was shown both in \cite{fingerhut1997designing} and \cite{gupta2001provisioning}.
-    It was conjectured \cite{italiano2006design} that this algorithm is in fact optimal.
+    It was conjectured \cite{italiano2006design} that this algorithm is exact.
     The conjecture was initially shown to hold on ring networks (the constrained setting where $G$ is a cycle) and some other special cases~\cite{hurkens2007virtual}, and was later resolved for arbitrary networks as well~\cite{goyal2013vpn}.
 
     In this report, we consider two additional classes of (polyhedral) demand universes.
     We first look into \emph{tree demands}, generalizing the class of hose matrices.
     The robust network design problem for tree demands is known as the \emph{generalized VPN problem}.
-    The 2-approximation algorithm for the VPN problem has a natural extension to the generalized case, and it is conjectured that this algorithm is optimal in this setting as well \cite{OLVER2016191}.
+    The 2-approximation algorithm for the VPN problem has a natural extension to the generalized case, and it is conjectured that this algorithm is exact in this setting as well \cite{OLVER2016191}.
     However, this remains unresolved.
     In this report, we discuss this algorithm and discuss some efforts of proving the conjecture on ring networks.
 
@@ -65,9 +65,9 @@
     In this report, we have introduced the general robust network design problem type, and have discussed a number of specific classes of robust network design problems.
     A famous class of problems is formed by taking traffic demands from the hose model, where then the minimization of the total network cost is known as the VPN problem.
     For the VPN problem, it has been shown that it is polynomial-time solvable.
-    We have furthermore discussed the classes of tree demands and the capped hose model, which characterize variations on the VPN problem for which it remains open whether the known constant-factor approximation algorithms are in fact optimal.
-    We have discussed these algorithms, and described a number of experiments aimed at possibly finding a counterexample for optimality of these algorithms.
-    We have also discussed some efforts of extending the proofs of optimality for restricted cases for the problem class in general.
+    We have furthermore discussed the classes of tree demands and the capped hose model, which characterize variations on the VPN problem for which it remains open whether the known constant-factor approximation algorithms are in fact exact algorithms.
+    We have discussed these algorithms, and described a number of experiments aimed at possibly finding a counterexample for the conjecture that these algorithms are exact.
+    We have also discussed some efforts of extending the proofs of exactness for restricted cases for the problem class in general.
 
     \bibliographystyle{plain}
     \bibliography{references}
